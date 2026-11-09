@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Upscayl Web Studio - Professional AI Image Upscaler</title>
+  <title>Free Upscale Me - Free AI Image Upscaler</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -99,10 +99,10 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-extrabold text-sm tracking-wide text-white">UPSCAYL</h1>
-          <span class="text-[9px] font-mono tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">PRO WEB</span>
+          <h1 class="font-extrabold text-sm tracking-wide text-white">FREE UPSCALE ME</h1>
+          <span class="text-[9px] font-mono tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">100% GRATIS</span>
         </div>
-        <p class="text-[10px] text-gray-400 font-medium hidden sm:block">Client-Distributed GPU & Neural Super-Resolution Engine</p>
+        <p id="deviceProfileText" class="text-[10px] text-gray-400 font-medium hidden sm:block">AI Super-Resolution Engine</p>
       </div>
     </div>
 
@@ -115,7 +115,7 @@
 
       <button onclick="toggleServerConfigModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-upscayl-border bg-upscayl-card hover:bg-upscayl-surfaceRaised text-gray-200 transition-colors" title="Konfigurasi NCNN Backend">
         <i data-lucide="server" class="w-3.5 h-3.5 text-indigo-400"></i>
-        <span class="hidden md:inline">NCNN Endpoint</span>
+        <span class="hidden md:inline">NCNN Server</span>
         <span id="serverIndicator" class="w-2 h-2 rounded-full bg-amber-500"></span>
       </button>
 
@@ -144,17 +144,17 @@
             <span id="imageMetaBadge" class="hidden text-[10px] font-mono text-gray-400 bg-upscayl-card px-2 py-0.5 rounded-full border border-upscayl-border">512×512</span>
           </div>
 
-          <!-- Dropzone Card -->
-          <div id="dropZone" class="relative group border-2 border-dashed border-upscayl-border hover:border-indigo-500/70 rounded-2xl bg-upscayl-card/60 hover:bg-upscayl-surfaceRaised/80 transition-all cursor-pointer p-4 text-center overflow-hidden">
-            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+          <!-- Dropzone Card: Perbaikan Input & Klik Eksplisit -->
+          <div id="dropZone" onclick="triggerFileInputClick(event)" class="relative group border-2 border-dashed border-upscayl-border hover:border-indigo-500/70 rounded-2xl bg-upscayl-card/60 hover:bg-upscayl-surfaceRaised/80 transition-all cursor-pointer p-4 text-center overflow-hidden">
+            <input type="file" id="fileInput" accept="image/*" class="sr-only" />
             
-            <div id="dropZoneContent" class="space-y-2 py-2">
+            <div id="dropZoneContent" class="space-y-2 py-2 pointer-events-none">
               <div class="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                 <i data-lucide="upload-cloud" class="w-6 h-6"></i>
               </div>
               <div>
                 <p class="text-xs font-semibold text-gray-200">Tap / Tarik gambar ke sini</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">Mendukung PNG, JPG, WebP (Maks 25MB)</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Mendukung PNG, JPG, JPEG, WebP, GIF</p>
               </div>
             </div>
 
@@ -167,7 +167,7 @@
                   <p id="fileDimensions" class="text-[10px] text-gray-400 font-mono mt-0.5">0 × 0 px</p>
                 </div>
               </div>
-              <button type="button" onclick="clearLoadedImage()" class="relative z-20 p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors shrink-0" title="Hapus Gambar">
+              <button type="button" onclick="event.stopPropagation(); clearLoadedImage();" class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors shrink-0" title="Ganti Gambar">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -322,7 +322,7 @@
           <div class="pt-2">
             <button id="upscaylBtn" onclick="startUpscaling()" disabled class="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-glow flex items-center justify-center gap-2 active:scale-[0.99] transition-all">
               <i data-lucide="zap" class="w-4 h-4"></i>
-              <span id="btnText">UPSCAYL GAMBAR SEKARANG</span>
+              <span id="btnText">MULAI PROSES UPSCALE</span>
             </button>
           </div>
         </div>
@@ -333,9 +333,9 @@
       <div class="p-3 border-t border-upscayl-border bg-upscayl-card/50 flex items-center justify-between text-[11px] text-gray-400 shrink-0">
         <span class="flex items-center gap-2">
           <span id="runtimeDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="runtimeStatusText">Client Parallel Engine: Ready</span>
+          <span id="runtimeStatusText">Free Engine: Ready</span>
         </span>
-        <span class="font-mono text-[10px] text-gray-500">v3.2 Enterprise</span>
+        <span class="font-mono text-[10px] text-gray-500">v3.3 Free Edition</span>
       </div>
     </aside>
 
@@ -417,11 +417,11 @@
         <div id="transformStage" class="hidden relative shadow-glass rounded-lg transition-transform duration-75 origin-center">
           
           <!-- Layer 1: Enhanced Result Image (Bottom Layer in Slider) -->
-          <img id="imgEnhanced" alt="Upscaled View" class="block max-w-none pointer-events-none select-none rounded-lg" />
+          <img id="imgEnhanced" alt="Upscaled View" class="block max-w-none pointer-events-none select-none rounded-lg" draggable="false" />
 
           <!-- Layer 2: Original Low-Res Image (Top layer clipped by slider) -->
           <div id="originalClipContainer" class="absolute inset-0 overflow-hidden pointer-events-none select-none rounded-lg">
-            <img id="imgOriginal" alt="Original View" class="block max-w-none pointer-events-none select-none" />
+            <img id="imgOriginal" alt="Original View" class="block max-w-none pointer-events-none select-none w-full h-full object-fill" draggable="false" />
             
             <!-- Original Badge Label -->
             <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-white tracking-wider border border-white/10 uppercase">
@@ -431,7 +431,7 @@
 
           <!-- Enhanced Badge Label -->
           <div class="absolute top-3 right-3 bg-indigo-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-indigo-200 tracking-wider border border-indigo-500/40 uppercase">
-            <span id="stageModelLabel">Upscayl 4x</span>
+            <span id="stageModelLabel">Upscaled</span>
           </div>
 
           <!-- SLIDER DIVIDER BAR -->
@@ -839,69 +839,79 @@
     });
 
     /**
+     * TRIGGER PEMILIHAN FILE DENGAN AMAN
+     */
+    function triggerFileInputClick(e) {
+      if (e.target.closest('button')) return;
+      const input = document.getElementById('fileInput');
+      input.value = ''; // Reset nilai agar memilih file yang sama tetap memicu event change
+      input.click();
+    }
+
+    /**
      * DETEKSI HARDWARE & AUTO-ROUTING CERDAS:
      * - Mobile (HP/Tablet) -> Dialihkan ke Cloud/Server Engine (Ringan, Tanpa Beban RAM HP)
      * - Laptop / PC -> Dibebankan ke Hardware Internal (ONNX / WebGPU Lokal)
      */
     function detectDeviceAndRouteEngine() {
-      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-      const isSmallScreen = window.innerWidth <= 820;
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileUA = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
+      try {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const isSmallScreen = window.innerWidth <= 820;
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isMobileUA = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
 
-      state.isMobileDevice = isMobileUA || (isTouch && isSmallScreen);
+        state.isMobileDevice = isMobileUA || (isTouch && isSmallScreen);
 
-      const ramGB = navigator.deviceMemory || (state.isMobileDevice ? 3 : 8);
-      const cpuCores = navigator.hardwareConcurrency || (state.isMobileDevice ? 4 : 8);
+        const ramGB = navigator.deviceMemory || (state.isMobileDevice ? 3 : 8);
 
-      const profileText = document.getElementById('deviceProfileText');
-      const routingTitle = document.getElementById('routingTitle');
-      const routingSubtitle = document.getElementById('routingSubtitle');
-      const routingTag = document.getElementById('routingTag');
-      const routingIcon = document.getElementById('routingIcon');
-      const engineSelector = document.getElementById('engineSelector');
+        const profileText = document.getElementById('deviceProfileText');
+        const routingTitle = document.getElementById('routingTitle');
+        const routingSubtitle = document.getElementById('routingSubtitle');
+        const routingTag = document.getElementById('routingTag');
+        const routingIcon = document.getElementById('routingIcon');
+        const engineSelector = document.getElementById('engineSelector');
 
-      if (state.isMobileDevice) {
-        // PERANGKAT MOBILE: Bebankan ke Server / Cloud Engine
-        profileText.textContent = `Mobile (${ramGB}GB RAM • Cloud Engine)`;
-        routingTitle.textContent = "Auto-Route: Smartphone/Tablet";
-        routingSubtitle.textContent = "Komputasi dibebankan ke Cloud Server (HP dingin & hemat baterai)";
-        routingTag.textContent = "Server Cloud";
-        routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold shrink-0";
-        routingIcon.setAttribute('data-lucide', 'cloud-lightning');
-        routingIcon.className = "w-4 h-4 text-indigo-400 shrink-0";
-
-        // Set engine awal ke server
-        engineSelector.value = 'gemini-ai';
-        handleEngineChange('gemini-ai', true);
-
-      } else {
-        // LAPTOP / PC: Bebankan ke Internal Hardware GPU/CPU
-        profileText.textContent = `Desktop (${ramGB}GB+ RAM • Internal GPU)`;
-        routingTitle.textContent = "Auto-Route: Laptop / PC";
-        routingSubtitle.textContent = "Komputasi dibebankan ke GPU/CPU internal perangkat Anda";
-        routingTag.textContent = "Internal GPU";
-        routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shrink-0";
-        routingIcon.setAttribute('data-lucide', 'cpu');
-        routingIcon.className = "w-4 h-4 text-emerald-400 shrink-0";
-
-        // Set engine awal ke local browser
-        engineSelector.value = 'onnx-web';
-        handleEngineChange('onnx-web', true);
-      }
-
-      lucide.createIcons();
-    }
-
-    function initConcurrencyEngine() {
-      if (typeof ort !== 'undefined') {
-        try {
-          const safeThreads = state.isMobileDevice ? 2 : Math.min(4, navigator.hardwareConcurrency || 2);
-          ort.env.wasm.numThreads = safeThreads;
-          ort.env.wasm.proxy = false;
-        } catch (e) {
-          console.warn("WASM concurrency profile warning:", e);
+        if (profileText) {
+          profileText.textContent = state.isMobileDevice 
+            ? `Mobile (${ramGB}GB RAM • Cloud Engine)` 
+            : `Desktop (${ramGB}GB+ RAM • Internal GPU)`;
         }
+
+        if (state.isMobileDevice) {
+          if (routingTitle) routingTitle.textContent = "Auto-Route: Smartphone/Tablet";
+          if (routingSubtitle) routingSubtitle.textContent = "Komputasi dibebankan ke Cloud Server (HP dingin & hemat baterai)";
+          if (routingTag) {
+            routingTag.textContent = "Server Cloud";
+            routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold shrink-0";
+          }
+          if (routingIcon) {
+            routingIcon.setAttribute('data-lucide', 'cloud-lightning');
+            routingIcon.className = "w-4 h-4 text-indigo-400 shrink-0";
+          }
+          if (engineSelector) {
+            engineSelector.value = 'gemini-ai';
+            handleEngineChange('gemini-ai', true);
+          }
+        } else {
+          if (routingTitle) routingTitle.textContent = "Auto-Route: Laptop / PC";
+          if (routingSubtitle) routingSubtitle.textContent = "Komputasi dibebankan ke GPU/CPU internal perangkat Anda";
+          if (routingTag) {
+            routingTag.textContent = "Internal GPU";
+            routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shrink-0";
+          }
+          if (routingIcon) {
+            routingIcon.setAttribute('data-lucide', 'cpu');
+            routingIcon.className = "w-4 h-4 text-emerald-400 shrink-0";
+          }
+          if (engineSelector) {
+            engineSelector.value = 'onnx-web';
+            handleEngineChange('onnx-web', true);
+          }
+        }
+
+        lucide.createIcons();
+      } catch (err) {
+        console.warn("Routing engine check skipped:", err);
       }
     }
 
@@ -1046,30 +1056,34 @@
     function setupEvents() {
       dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropZone.classList.add('border-indigo-500', 'bg-indigo-950/20');
       });
 
-      dropZone.addEventListener('dragleave', () => {
+      dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/20');
       });
 
       dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/20');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           processFile(e.dataTransfer.files[0]);
         }
       });
 
       fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
+        if (e.target.files && e.target.files.length > 0) {
           processFile(e.target.files[0]);
         }
       });
 
       document.getElementById('mobileTilingToggle').addEventListener('change', (e) => {
         state.useTiling = e.target.checked;
-        showToast(state.useTiling ? "Tiling Guard Aktif: RAM ponsel terlindungi" : "Tiling Dimatikan: Pemrosesan langsung (risiko OOM di HP)", state.useTiling ? "info" : "warning");
+        showToast(state.useTiling ? "Tiling Guard Aktif: RAM ponsel terlindungi" : "Tiling Dimatikan: Pemrosesan langsung", state.useTiling ? "info" : "warning");
       });
 
       document.getElementById('doubleUpscaleToggle').addEventListener('change', (e) => {
@@ -1082,37 +1096,44 @@
       });
     }
 
-    // MEMORY SAFEGUARD AUDIT UNTUK 1000 PENGGUNA BERSAMAAN
+    // AUDIT & ROBUST FILE LOADER
     function processFile(file) {
-      if (!file.type.match('image.*')) {
-        showToast("Mohon pilih file gambar yang valid (JPG, PNG, WEBP)", "error");
+      if (!file) return;
+
+      // Izinkan semua tipe gambar standar
+      if (!file.type.startsWith('image/')) {
+        showToast("Mohon pilih file gambar yang valid (JPG, PNG, WEBP, dll.)", "error");
         return;
       }
 
-      // Safeguard: Batas ukuran file 25MB untuk mencegah tab crash di ponsel
-      if (file.size > 25 * 1024 * 1024) {
-        showToast("Ukuran file terlalu besar (>25MB). Harap kompres terlebih dahulu.", "error");
+      if (file.size > 30 * 1024 * 1024) {
+        showToast("Ukuran file terlalu besar (>30MB). Harap pilih gambar yang lebih kecil.", "error");
         return;
       }
 
       const reader = new FileReader();
+      reader.onerror = () => {
+        showToast("Gagal membaca file gambar", "error");
+      };
+
       reader.onload = (event) => {
+        const dataUrl = event.target.result;
         const img = new Image();
+        
+        img.onerror = () => {
+          showToast("Format gambar tidak didukung atau berkas rusak", "error");
+        };
+
         img.onload = () => {
-          // Audit: Deteksi dimensi ekstrem
-          if (img.naturalWidth > 6000 || img.naturalHeight > 6000) {
-            showToast("Dimensi gambar sangat besar. Mengaktifkan tile memory allocator otomatis.", "info");
-          }
-
           state.originalImage = img;
-          state.originalBase64 = event.target.result;
-          state.originalWidth = img.naturalWidth;
-          state.originalHeight = img.naturalHeight;
+          state.originalBase64 = dataUrl;
+          state.originalWidth = img.naturalWidth || img.width;
+          state.originalHeight = img.naturalHeight || img.height;
 
-          thumbMini.src = img.src;
-          fileName.textContent = file.name;
-          fileDimensions.textContent = `${img.naturalWidth} × ${img.naturalHeight} px • ${(file.size / (1024*1024)).toFixed(2)} MB`;
-          imageMetaBadge.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
+          thumbMini.src = dataUrl;
+          fileName.textContent = file.name || 'image.png';
+          fileDimensions.textContent = `${state.originalWidth} × ${state.originalHeight} px • ${(file.size / (1024*1024)).toFixed(2)} MB`;
+          imageMetaBadge.textContent = `${state.originalWidth}×${state.originalHeight}`;
           imageMetaBadge.classList.remove('hidden');
 
           dropZoneContent.classList.add('hidden');
@@ -1125,20 +1146,22 @@
           metricsBar.classList.remove('hidden');
           metricsBar.classList.add('flex');
 
-          imgOriginal.src = img.src;
-          imgEnhanced.src = img.src;
+          imgOriginal.src = dataUrl;
+          imgEnhanced.src = dataUrl;
 
           updateResolutionForecast();
           resetZoomPan();
           updateSliderPosition(50);
-          showToast("Gambar berhasil dimuat", "success");
+          showToast("Gambar berhasil dimuat!", "success");
 
           if (window.innerWidth < 1024) {
             switchMobileTab('preview');
           }
         };
-        img.src = event.target.result;
+
+        img.src = dataUrl;
       };
+
       reader.readAsDataURL(file);
     }
 
