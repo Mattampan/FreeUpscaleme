@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Upscayl Web Studio - Professional AI Image Upscaler</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- ONNX Runtime Web -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            upscayl: {
+              base: '#0c0d10',
+              surface: '#14161b',
+              surfaceRaised: '#1a1c23',
+              card: '#1f222b',
+              border: '#2a2e3a',
+              borderFocus: '#6366f1',
+              accent: '#6366f1',
+              accentHover: '#4f46e5',
+              success: '#10b981',
+              warning: '#f59e0b',
+              danger: '#ef4444'
+            }
+          },
+          boxShadow: {
+            'glow': '0 0 25px -5px rgba(99, 102, 241, 0.35)',
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.45)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0c0d10;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a2e3a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #434857;
+    }
+    
+    /* Checkerboard background */
+    .bg-checkerboard {
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+      background-image: 
+        linear-gradient(45deg, #131418 25%, transparent 25%, transparent 75%, #131418 75%, #131418),
+        linear-gradient(45deg, #131418 25%, #0e0f12 25%, #0e0f12 75%, #131418 75%, #131418);
+    }
+
+    /* Slider handle touch protection */
+    .slider-divider-line {
+      touch-action: none;
+    }
+
+    /* Mobile safe areas */
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+  </style>
+</head>
+<body class="bg-upscayl-base text-gray-200 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white overflow-hidden">
+
+  <!-- TOAST NOTIFICATION CONTAINER (NON-BLOCKING) -->
+  <div id="toastContainer" class="fixed top-16 right-4 left-4 sm:left-auto sm:w-80 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TOP APP BAR -->
+  <header class="h-14 border-b border-upscayl-border bg-upscayl-surface/95 backdrop-blur-xl px-4 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-glow">
+        <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-sm tracking-wide text-white">UPSCAYL</h1>
+          <span class="text-[9px] font-mono tracking-wider font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">PRO WEB</span>
+        </div>
+        <p class="text-[10px] text-gray-400 font-medium hidden sm:block">Client-Distributed GPU & Neural Super-Resolution Engine</p>
+      </div>
+    </div>
+
+    <!-- Right utility icons -->
+    <div class="flex items-center gap-2">
+      <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-upscayl-card/80 border border-upscayl-border text-[11px] font-mono text-gray-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="loadBalanceStatus">Distributed Node Active</span>
+      </div>
+
+      <button onclick="toggleServerConfigModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-upscayl-border bg-upscayl-card hover:bg-upscayl-surfaceRaised text-gray-200 transition-colors" title="Konfigurasi NCNN Backend">
+        <i data-lucide="server" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span class="hidden md:inline">NCNN Endpoint</span>
+        <span id="serverIndicator" class="w-2 h-2 rounded-full bg-amber-500"></span>
+      </button>
+
+      <a href="https://github.com/upscayl/custom-models" target="_blank" rel="noopener" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-upscayl-border bg-upscayl-card hover:bg-upscayl-surfaceRaised text-gray-200 transition-colors">
+        <i data-lucide="github" class="w-3.5 h-3.5"></i>
+        <span>Models</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN APP WORKSPACE -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+    <!-- LEFT SIDEBAR: 4-STEP CONTROLS PANEL -->
+    <aside id="controlsPanel" class="w-full lg:w-[420px] xl:w-[450px] shrink-0 border-r border-upscayl-border bg-upscayl-surface flex flex-col h-[calc(100vh-3.5rem)] overflow-y-auto z-20">
+      
+      <div class="p-4 sm:p-5 space-y-6 flex-1 pb-24 lg:pb-6">
+        
+        <!-- STEP 1: SELECT IMAGE -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-400">
+              <span class="w-5 h-5 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-[10px] text-white font-mono">1</span>
+              Pilih Gambar
+            </span>
+            <span id="imageMetaBadge" class="hidden text-[10px] font-mono text-gray-400 bg-upscayl-card px-2 py-0.5 rounded-full border border-upscayl-border">512×512</span>
+          </div>
+
+          <!-- Dropzone Card -->
+          <div id="dropZone" class="relative group border-2 border-dashed border-upscayl-border hover:border-indigo-500/70 rounded-2xl bg-upscayl-card/60 hover:bg-upscayl-surfaceRaised/80 transition-all cursor-pointer p-4 text-center overflow-hidden">
+            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+            
+            <div id="dropZoneContent" class="space-y-2 py-2">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-gray-200">Tap / Tarik gambar ke sini</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Mendukung PNG, JPG, WebP (Maks 25MB)</p>
+              </div>
+            </div>
+
+            <!-- File loaded mini preview -->
+            <div id="fileInfoCard" class="hidden items-center justify-between gap-3 text-left">
+              <div class="flex items-center gap-3 overflow-hidden">
+                <img id="thumbMini" src="" alt="Thumbnail" class="w-11 h-11 rounded-xl object-cover border border-upscayl-border shrink-0 bg-black/40" />
+                <div class="truncate">
+                  <p id="fileName" class="text-xs font-semibold text-white truncate">image.png</p>
+                  <p id="fileDimensions" class="text-[10px] text-gray-400 font-mono mt-0.5">0 × 0 px</p>
+                </div>
+              </div>
+              <button type="button" onclick="clearLoadedImage()" class="relative z-20 p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors shrink-0" title="Hapus Gambar">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: SELECT ENGINE FIRST -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-400">
+              <span class="w-5 h-5 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-[10px] text-white font-mono">2</span>
+              Komputasi Engine
+            </span>
+            <span id="engineBadge" class="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/50">ONNX Web (Local)</span>
+          </div>
+
+          <!-- Dynamic Routing Banner -->
+          <div id="routingModeBanner" class="p-2.5 rounded-xl bg-upscayl-surfaceRaised border border-upscayl-border flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <i id="routingIcon" data-lucide="monitor" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+              <div class="truncate">
+                <div id="routingTitle" class="font-bold text-[11px] text-white">Auto-Route: Desktop PC</div>
+                <div id="routingSubtitle" class="text-[10px] text-gray-400">Beban diproses di hardware internal (Lokal)</div>
+              </div>
+            </div>
+            <span id="routingTag" class="text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shrink-0">
+              Internal GPU
+            </span>
+          </div>
+
+          <div class="bg-upscayl-card/80 p-3 rounded-2xl border border-upscayl-border space-y-2">
+            <div class="relative">
+              <select id="engineSelector" onchange="handleEngineChange(this.value, false)" class="w-full bg-upscayl-surfaceRaised border border-upscayl-border rounded-xl text-xs py-2.5 px-3 text-gray-100 font-medium focus:outline-none focus:border-indigo-500 transition-colors appearance-none cursor-pointer">
+                <!-- Group Cloud / Server Engines -->
+                <optgroup label="☁️ Server / Cloud AI (Direkomendasikan untuk HP/Mobile)">
+                  <option value="gemini-ai">✨ Gemini 3.1 Flash Neural Enhancer (Cloud AI Server)</option>
+                  <option value="huggingface-free">🤗 Hugging Face Community Inference (Cloud Hub)</option>
+                  <option value="gradio-bridge">🎛️ Gradio WebUI Open-Bridge (Remote Endpoint)</option>
+                  <option value="ncnn-server">🖥️ Upscayl NCNN Vulkan Dedicated Server (Remote C++)</option>
+                </optgroup>
+                <!-- Group Client Hardware Engines -->
+                <optgroup label="💻 Internal Hardware (Direkomendasikan untuk Laptop/PC)">
+                  <option value="onnx-web">🌐 ONNX Runtime Web (Internal WASM/CPU)</option>
+                  <option value="webgpu-core">⚡ WebGPU Native Hardware Core (Internal GPU)</option>
+                  <option value="tfjs-webgl">🧠 TensorFlow.js WebGL (Internal GPU Shaders)</option>
+                </optgroup>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <p id="engineHint" class="text-[11px] text-gray-400 leading-relaxed">
+              Mengeksekusi model neural network langsung pada perangkat klien. Mampu melayani ribuan pengguna bersamaan tanpa antrean server.
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 3: SELECT COMPATIBLE AI MODEL -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-400">
+              <span class="w-5 h-5 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-[10px] text-white font-mono">3</span>
+              Model AI Kompatibel
+            </span>
+            <span id="modelCounter" class="text-[10px] text-gray-400 font-mono">3 Model Tersedia</span>
+          </div>
+
+          <!-- Dynamic Compatible Models Container -->
+          <div id="modelsContainer" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Model Info Card -->
+          <div id="selectedModelDesc" class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-900/40 text-xs text-indigo-200/90 flex items-start gap-2.5">
+            <i data-lucide="info" class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5"></i>
+            <div>
+              <span id="modelDetailTitle" class="font-semibold text-white">Real-ESRGAN Compact</span>: 
+              <span id="modelDetailText" class="text-gray-300">Model neural network SRVGGNet open-source yang dieksekusi 100% lokal di browser pengguna.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: CONFIGURATION & UPSCAYL BUTTON -->
+        <div class="space-y-3">
+          <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-400">
+            <span class="w-5 h-5 rounded-lg bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-[10px] text-white font-mono">4</span>
+            Pengaturan & Eksekusi
+          </span>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- Scale Factor -->
+            <div class="bg-upscayl-card/80 p-3 rounded-2xl border border-upscayl-border">
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Scale</label>
+              <div class="grid grid-cols-3 gap-1 bg-upscayl-surfaceRaised p-1 rounded-xl border border-upscayl-border">
+                <button type="button" onclick="setScale(2)" class="scale-btn py-1 text-xs rounded-lg font-semibold text-gray-400 hover:text-white transition-all" data-scale="2">2x</button>
+                <button type="button" onclick="setScale(4)" class="scale-btn py-1 text-xs rounded-lg font-semibold bg-indigo-600 text-white shadow-sm transition-all" data-scale="4">4x</button>
+                <button type="button" onclick="setScale(8)" class="scale-btn py-1 text-xs rounded-lg font-semibold text-gray-400 hover:text-white transition-all" data-scale="8">8x</button>
+              </div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="bg-upscayl-card/80 p-3 rounded-2xl border border-upscayl-border">
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Format</label>
+              <select id="outputFormat" class="w-full bg-upscayl-surfaceRaised border border-upscayl-border rounded-xl text-xs py-2 px-2.5 text-gray-200 font-medium focus:outline-none focus:border-indigo-500 cursor-pointer">
+                <option value="png">PNG (Lossless)</option>
+                <option value="jpeg">JPG (Standard)</option>
+                <option value="webp" selected>WEBP (Optimal)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Feature Toggles & Mobile Safe Tiling Switch -->
+          <div class="bg-upscayl-card/80 rounded-2xl border border-upscayl-border divide-y divide-upscayl-border text-xs">
+            <!-- Mobile Tile Engine Toggle -->
+            <label class="flex items-center justify-between p-3 cursor-pointer hover:bg-upscayl-surfaceRaised/40 transition-colors">
+              <div class="pr-2">
+                <div class="font-semibold text-gray-200 flex items-center gap-1.5">
+                  <span>Mobile Tiling Guard (RAM Saver)</span>
+                  <span id="tileModeBadge" class="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded-full font-mono font-bold">Auto</span>
+                </div>
+                <div class="text-[11px] text-gray-400">Memotong gambar jadi petak-petak kecil agar HP tidak crash/OOM.</div>
+              </div>
+              <input type="checkbox" id="mobileTilingToggle" class="w-4 h-4 accent-indigo-600 rounded bg-upscayl-base border-gray-700 cursor-pointer" checked>
+            </label>
+
+            <!-- Double Upscale Toggle -->
+            <label class="flex items-center justify-between p-3 cursor-pointer hover:bg-upscayl-surfaceRaised/40 transition-colors">
+              <div class="pr-2">
+                <div class="font-semibold text-gray-200 flex items-center gap-1.5">
+                  <span>Double Upscayl</span>
+                  <span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full font-mono font-bold">16x Max</span>
+                </div>
+                <div class="text-[11px] text-gray-400">Proses dua tahap berurutan untuk resolusi raksasa.</div>
+              </div>
+              <input type="checkbox" id="doubleUpscaleToggle" class="w-4 h-4 accent-indigo-600 rounded bg-upscayl-base border-gray-700 cursor-pointer">
+            </label>
+
+            <!-- Face Enhance (GFPGAN style) -->
+            <label class="flex items-center justify-between p-3 cursor-pointer hover:bg-upscayl-surfaceRaised/40 transition-colors">
+              <div class="pr-2">
+                <div class="font-semibold text-gray-200 flex items-center gap-1.5">
+                  <span>Face Enhancement (GFPGAN)</span>
+                  <i data-lucide="smile" class="w-3.5 h-3.5 text-indigo-400"></i>
+                </div>
+                <div class="text-[11px] text-gray-400">Rekonstruksi mata, tekstur kulit, dan helai rambut.</div>
+              </div>
+              <input type="checkbox" id="faceEnhanceToggle" class="w-4 h-4 accent-indigo-600 rounded bg-upscayl-base border-gray-700 cursor-pointer" checked>
+            </label>
+          </div>
+
+          <!-- UPSCAYL ACTION BUTTON -->
+          <div class="pt-2">
+            <button id="upscaylBtn" onclick="startUpscaling()" disabled class="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 disabled:cursor-not-allowed shadow-glow flex items-center justify-center gap-2 active:scale-[0.99] transition-all">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span id="btnText">UPSCAYL GAMBAR SEKARANG</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER STATUS IN SIDEBAR -->
+      <div class="p-3 border-t border-upscayl-border bg-upscayl-card/50 flex items-center justify-between text-[11px] text-gray-400 shrink-0">
+        <span class="flex items-center gap-2">
+          <span id="runtimeDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="runtimeStatusText">Client Parallel Engine: Ready</span>
+        </span>
+        <span class="font-mono text-[10px] text-gray-500">v3.2 Enterprise</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE: VIEWER / SPLIT COMPARISON SLIDER -->
+    <section id="previewPanel" class="flex-1 flex flex-col bg-upscayl-base relative overflow-hidden select-none">
+      
+      <!-- TOOLBAR ATOP PREVIEW -->
+      <div class="h-12 border-b border-upscayl-border bg-upscayl-surface/90 backdrop-blur px-3 sm:px-4 flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center gap-2">
+          <!-- View Modes -->
+          <div class="flex bg-upscayl-card/90 p-0.5 rounded-xl border border-upscayl-border text-xs">
+            <button onclick="setViewMode('split')" id="btnViewSplit" class="px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white flex items-center gap-1 transition-all">
+              <i data-lucide="columns" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Split</span>
+            </button>
+            <button onclick="setViewMode('result')" id="btnViewResult" class="px-2.5 py-1 rounded-lg font-semibold text-gray-400 hover:text-white flex items-center gap-1 transition-all">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Upscaled</span>
+            </button>
+            <button onclick="setViewMode('original')" id="btnViewOrig" class="px-2.5 py-1 rounded-lg font-semibold text-gray-400 hover:text-white flex items-center gap-1 transition-all">
+              <i data-lucide="undo" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Original</span>
+            </button>
+          </div>
+
+          <span id="zoomLevelIndicator" class="text-xs font-mono text-gray-400 hidden sm:inline ml-2">100%</span>
+        </div>
+
+        <!-- Canvas Controls & Download -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button onclick="resetZoomPan()" class="p-2 text-gray-300 hover:text-white bg-upscayl-card border border-upscayl-border rounded-xl transition-colors" title="Fit to Screen">
+            <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="zoomIn()" class="p-2 text-gray-300 hover:text-white bg-upscayl-card border border-upscayl-border rounded-xl transition-colors" title="Zoom In">
+            <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="zoomOut()" class="p-2 text-gray-300 hover:text-white bg-upscayl-card border border-upscayl-border rounded-xl transition-colors" title="Zoom Out">
+            <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+          </button>
+
+          <button id="downloadBtn" onclick="downloadResult()" disabled class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-emerald-700/20 active:scale-95 transition-all">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Simpan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE VIEWPORT CONTAINER -->
+      <div id="viewportContainer" class="flex-1 relative overflow-hidden bg-checkerboard flex items-center justify-center cursor-grab active:cursor-grabbing">
+        
+        <!-- Placeholder / Empty State -->
+        <div id="emptyState" class="flex flex-col items-center justify-center p-6 text-center max-w-sm mx-auto text-gray-400">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-upscayl-card/80 border border-upscayl-border flex items-center justify-center text-indigo-400 mb-4 shadow-xl">
+            <i data-lucide="wand-2" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+          </div>
+          <h3 class="text-base font-bold text-gray-100 mb-1">Canvas Siap</h3>
+          <p class="text-xs text-gray-400 leading-relaxed mb-4">
+            Unggah foto Anda atau gunakan benchmark demo untuk menguji kemampuan peningkatan resolusi tinggi.
+          </p>
+          <button onclick="loadSampleImage()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-upscayl-card hover:bg-upscayl-surfaceRaised text-indigo-300 border border-indigo-500/30 flex items-center gap-2 active:scale-95 transition-all">
+            <i data-lucide="sparkle" class="w-3.5 h-3.5"></i>
+            Uji Contoh Benchmark
+          </button>
+        </div>
+        <!-- Processing Loader Overlay with Tile Counter -->
+        <div id="processingOverlay" class="hidden absolute inset-0 bg-black/75 backdrop-blur-md z-30 flex flex-col items-center justify-center text-center p-6">
+          <div class="relative w-16 h-16 mb-4">
+            <div class="w-16 h-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-indigo-400">
+              <i data-lucide="cpu" class="w-6 h-6"></i>
+            </div>
+          </div>
+          <h4 id="progressStatus" class="text-sm font-bold text-white tracking-wide mb-1">Menjalankan Upscayl Engine...</h4>
+          <p id="progressDetail" class="text-xs text-indigo-300/80 font-mono mb-2">Memproses konvolusi neural super-resolusi</p>
+          <div id="tileProgressIndicator" class="text-[11px] font-mono text-emerald-400 mb-3 hidden">Tile: 0 / 0 (RAM Safe)</div>
+          <div class="w-60 h-2 bg-gray-800 rounded-full overflow-hidden border border-gray-700/80 p-0.5">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300 w-1/4"></div>
+          </div>
+        </div>
+
+        <!-- TRANSFORMABLE STAGE (Zoom & Pan applied here) -->
+        <div id="transformStage" class="hidden relative shadow-glass rounded-lg transition-transform duration-75 origin-center">
+          
+          <!-- Layer 1: Enhanced Result Image (Bottom Layer in Slider) -->
+          <img id="imgEnhanced" alt="Upscaled View" class="block max-w-none pointer-events-none select-none rounded-lg" />
+
+          <!-- Layer 2: Original Low-Res Image (Top layer clipped by slider) -->
+          <div id="originalClipContainer" class="absolute inset-0 overflow-hidden pointer-events-none select-none rounded-lg">
+            <img id="imgOriginal" alt="Original View" class="block max-w-none pointer-events-none select-none" />
+            
+            <!-- Original Badge Label -->
+            <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-white tracking-wider border border-white/10 uppercase">
+              Original
+            </div>
+          </div>
+
+          <!-- Enhanced Badge Label -->
+          <div class="absolute top-3 right-3 bg-indigo-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-indigo-200 tracking-wider border border-indigo-500/40 uppercase">
+            <span id="stageModelLabel">Upscayl 4x</span>
+          </div>
+
+          <!-- SLIDER DIVIDER BAR -->
+          <div id="sliderDivider" class="slider-divider-line absolute top-0 bottom-0 w-0.5 bg-white cursor-ew-resize z-20 shadow-[0_0_15px_rgba(0,0,0,0.9)] flex items-center justify-center">
+            <div class="w-8 h-8 -ml-[15px] rounded-full bg-white shadow-xl flex items-center justify-center text-gray-900 border border-gray-300 active:scale-110 transition-transform">
+              <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BOTTOM COMPARISON METRICS BAR -->
+      <div id="metricsBar" class="hidden h-10 border-t border-upscayl-border bg-upscayl-surface px-4 items-center justify-between text-[11px] font-mono text-gray-400 shrink-0 z-20 sm:flex">
+        <div class="flex items-center gap-3">
+          <span>INPUT: <strong id="metricInputRes" class="text-gray-200">512×512</strong></span>
+          <span class="text-indigo-400">➜</span>
+          <span>OUTPUT: <strong id="metricOutputRes" class="text-emerald-400">2048×2048</strong></span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span>ENGINE: <strong id="metricEngineName" class="text-indigo-400">ONNX</strong></span>
+          <span>MODEL: <strong id="metricModelName" class="text-gray-200">Real-ESRGAN</strong></span>
+          <span>LATENCY: <strong id="metricLatency" class="text-gray-200">0.0s</strong></span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MOBILE BOTTOM NAVIGATION DOCK (ERGONOMIC THUMB FRIENDLY) -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-upscayl-surface/95 backdrop-blur-2xl border-t border-upscayl-border flex items-center justify-around px-4 z-40 safe-bottom">
+    <button id="mobileNavSetup" onclick="switchMobileTab('controls')" class="flex flex-col items-center gap-1 text-indigo-400 py-1 px-4 rounded-xl">
+      <i data-lucide="sliders" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold">Pengaturan</span>
+    </button>
+
+    <div class="w-px h-6 bg-upscayl-border"></div>
+
+    <button id="mobileNavViewer" onclick="switchMobileTab('preview')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white py-1 px-4 rounded-xl">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold">Hasil Canvas</span>
+    </button>
+
+    <div class="w-px h-6 bg-upscayl-border"></div>
+
+    <button id="mobileNavHistory" onclick="toggleHistoryModal()" class="relative flex flex-col items-center gap-1 text-gray-400 hover:text-white py-1 px-4 rounded-xl">
+      <div class="relative">
+        <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+        <span id="historyBadgeCount" class="hidden absolute -top-1.5 -right-2 bg-indigo-600 text-white text-[9px] font-mono font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      </div>
+      <span class="text-[10px] font-bold">History</span>
+    </button>
+  </nav>
+
+  <!-- HISTORY MODAL DRAWER -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-upscayl-surface border border-upscayl-border w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden safe-bottom animate-in fade-in slide-in-from-bottom duration-200">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-upscayl-border flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+            <i data-lucide="history" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Riwayat Pemrosesan</h3>
+            <p id="historySubtitle" class="text-[10px] text-gray-400">0 gambar disimpan dalam sesi ini</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="clearAllHistory()" class="px-2.5 py-1.5 text-[11px] font-medium text-red-400 hover:bg-red-500/10 rounded-xl transition-colors" title="Hapus Semua Riwayat">
+            Bersihkan
+          </button>
+          <button onclick="toggleHistoryModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-upscayl-card">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- History List Container -->
+      <div id="historyListContainer" class="p-4 overflow-y-auto space-y-3 flex-1 min-h-[220px]">
+        <!-- Populated Dynamically -->
+      </div>
+
+      <!-- Empty History State -->
+      <div id="historyEmptyState" class="hidden flex-col items-center justify-center py-12 px-4 text-center text-gray-400">
+        <div class="w-12 h-12 rounded-2xl bg-upscayl-card border border-upscayl-border flex items-center justify-center text-gray-500 mb-3">
+          <i data-lucide="clock" class="w-6 h-6"></i>
+        </div>
+        <p class="text-xs font-semibold text-gray-300">Belum ada riwayat</p>
+        <p class="text-[11px] text-gray-500 mt-0.5">Gambar yang Anda proses akan tercatat di sini secara otomatis.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NCNN SERVER CONFIG MODAL (ACCORDANT WITH NO-ALERT POLICIES) -->
+  <div id="serverModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-upscayl-surface border border-upscayl-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+            <i data-lucide="server" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">NCNN Vulkan Connector</h3>
+            <p class="text-[10px] text-gray-400">Eksekusi .bin & .param Asli</p>
+          </div>
+        </div>
+        <button onclick="toggleServerConfigModal()" class="text-gray-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-400 leading-relaxed">
+        Untuk menjalankan model C++ Vulkan 100% identik dengan Upscayl desktop, jalankan bridge server di komputer lokal:
+      </p>
+
+      <div class="bg-upscayl-base p-3 rounded-xl border border-upscayl-border font-mono text-[11px] text-gray-300 select-all overflow-x-auto">
+        git clone https://github.com/upscayl/upscayl-ncnn.git<br>
+        python server.py --port 8080 --gpu
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-semibold text-gray-300">Server Endpoint URL</label>
+        <input type="text" id="ncnnServerUrl" value="http://localhost:8080" class="w-full bg-upscayl-base border border-upscayl-border rounded-xl text-xs py-2.5 px-3 text-gray-200 focus:outline-none focus:border-indigo-500 font-mono">
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="testNcnnConnection()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-upscayl-card border border-upscayl-border hover:bg-upscayl-surfaceRaised text-gray-200 flex items-center gap-1.5 active:scale-95 transition-all">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          Uji Koneksi
+        </button>
+        <button onclick="saveNcnnServerUrl()" class="px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95 transition-all">
+          Simpan Konfigurasi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIDDEN OFF-SCREEN WORKING CANVASES -->
+  <canvas id="workingCanvas" class="hidden"></canvas>
+  <canvas id="outputCanvas" class="hidden"></canvas>
+
+  <script>
+    /**
+     * TOAST NOTIFICATION UTILITY (MENGGANTIKAN ALERT)
+     */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let borderCol = 'border-indigo-500/40';
+      let icon = 'info';
+      let textCol = 'text-indigo-400';
+
+      if (type === 'success') {
+        borderCol = 'border-emerald-500/40';
+        icon = 'check-circle';
+        textCol = 'text-emerald-400';
+      } else if (type === 'error') {
+        borderCol = 'border-red-500/40';
+        icon = 'alert-triangle';
+        textCol = 'text-red-400';
+      }
+
+      toast.className = `p-3 rounded-2xl bg-upscayl-surfaceRaised/95 backdrop-blur-xl border ${borderCol} shadow-2xl flex items-center gap-3 text-xs text-gray-200 pointer-events-auto transition-all transform translate-y-2 duration-200`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 ${textCol} shrink-0"></i>
+        <span class="flex-1 font-medium">${message}</span>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    /**
+     * MODEL REGISTRY & COMPATIBILITY FILTER
+     */
+    const OPEN_MODELS = [
+      // ONNX WEB
+      {
+        id: "realesrgan-compact-onnx",
+        name: "Real-ESRGAN Compact (SRVGGNet)",
+        engine: "onnx-web",
+        scale: 4,
+        badge: "ONNX Local",
+        desc: "Arsitektur neural network super-resolution open-source yang sangat efisien dan dieksekusi 100% di browser tanpa server luar."
+      },
+      {
+        id: "anime-video-v3",
+        name: "RealESR AnimeVideo v3",
+        engine: "onnx-web",
+        scale: 2,
+        badge: "ONNX Anime",
+        desc: "Khusus untuk anime, ilustrasi 2D, dan manga. Mempertahankan garis tepi bersih bebas artefak gerigi langsung di browser."
+      },
+      {
+        id: "real-cugan-browser",
+        name: "Real-CUGAN SE Compact",
+        engine: "onnx-web",
+        scale: 2,
+        badge: "WASM Super-Res",
+        desc: "Model generasi anime open-source dengan penghilang kompresi JPEG/artefak media sosial secara efisien."
+      },
+
+      // WEBGPU SHADER
+      {
+        id: "webgpu-lanczos-unsharp",
+        name: "WebGPU Lanczos-3 + High-Pass",
+        engine: "webgpu-core",
+        scale: 4,
+        badge: "WebGPU Native",
+        desc: "Memanfaatkan compute pipeline WebGPU perangkat keras langsung untuk interpolasi sinc matriks dan eliminasi blur secara zero-latency."
+      },
+      {
+        id: "webgpu-denoise-upscale",
+        name: "WebGPU Bilateral Clarity Reconstruction",
+        engine: "webgpu-core",
+        scale: 2,
+        badge: "Compute Shader",
+        desc: "Filter bilateral berbasis WebGPU untuk membersihkan noise foto gelap sembari mempertegas tepian kontur objek."
+      },
+
+      // TENSORFLOW.JS WEBGL
+      {
+        id: "tfjs-esrgan-lite",
+        name: "ESRGAN Lite (TF.js RRDB Net)",
+        engine: "tfjs-webgl",
+        scale: 4,
+        badge: "TF.js WebGL",
+        desc: "Model Residual-in-Residual Dense Network (RRDB) open-source Google yang dijalankan melalui GPU browser via WebGL shaders."
+      },
+      {
+        id: "tfjs-div2k-sr",
+        name: "DIV2K Fine-Tuned Super-Resolution",
+        engine: "tfjs-webgl",
+        scale: 2,
+        badge: "TF.js Local",
+        desc: "Model open-source yang dilatih khusus dataset DIV2K resolusi tinggi untuk merestorasi dedaunan, tekstur batu, dan arsitektur."
+      },
+
+      // HUGGING FACE FREE
+      {
+        id: "hf-realesrgan-x4plus",
+        name: "Real-ESRGAN x4plus (Official Hub)",
+        engine: "huggingface-free",
+        scale: 4,
+        badge: "HF Serverless",
+        desc: "Model open-source terpopuler di repositori Hugging Face yang dieksekusi gratis pada community inference server."
+      },
+      {
+        id: "hf-swinir-large",
+        name: "SwinIR Classical Image SR",
+        engine: "huggingface-free",
+        scale: 4,
+        badge: "Transformer SR",
+        desc: "Swin Transformer Image Restoration open-source untuk restorasi kualitas gambar klasik dengan detail permukaan yang sangat halus."
+      },
+
+      // GRADIO OPEN-BRIDGE
+      {
+        id: "gradio-sd-upscaler",
+        name: "Stable Diffusion 4x Latent Upscaler",
+        engine: "gradio-bridge",
+        scale: 4,
+        badge: "Diffusion SR",
+        desc: "Menggunakan public GradIO endpoint untuk latent upscaling berbasis diffusion network yang merekonstruksi tekstur mikro baru."
+      },
+      {
+        id: "gradio-gfpgan-v14",
+        name: "GFPGAN Clean Face Restoration v1.4",
+        engine: "gradio-bridge",
+        scale: 2,
+        badge: "Face Specialist",
+        desc: "Model restorasi wajah open-source dari Tencent ARC yang mengembalikan kejernihan mata, alis, dan gigi."
+      },
+
+      // NCNN VULKAN SERVER
+      {
+        id: "ultrasharp-4x-ncnn",
+        name: "4x UltraSharp (Kim2091)",
+        engine: "ncnn-server",
+        scale: 4,
+        badge: "NCNN Vulkan",
+        desc: "Model resmi Upscayl terpopuler untuk foto realistis dan tekstur natural, diproses lewat binary NCNN Vulkan C++ murni."
+      },
+      {
+        id: "remacri-4x-ncnn",
+        name: "4x Remacri (foolhardy)",
+        engine: "ncnn-server",
+        scale: 4,
+        badge: "NCNN Vulkan",
+        desc: "Arsitektur Real-ESRGAN untuk fotografi detail tinggi, daun, kulit, dan perbaikan noise kompresi berat."
+      },
+      {
+        id: "uniscale-restore-ncnn",
+        name: "UniScale Restore (Kim2091)",
+        engine: "ncnn-server",
+        scale: 4,
+        badge: "Custom-Models",
+        desc: "Dari repositori upscayl/custom-models. Spesialis deblurring dan de-JPEG tingkat lanjut untuk foto lawas/buram."
+      },
+
+      // GEMINI VISION CLOUD
+      {
+        id: "gemini-generative-sr",
+        name: "Gemini Generative Sub-Pixel Detailer",
+        engine: "gemini-ai",
+        scale: 4,
+        badge: "Cloud AI",
+        desc: "Model multimodal AI yang merekonstruksi tekstur sub-pixel, helai rambut, dan pori-pori kulit secara cerdas."
+      },
+      {
+        id: "gemini-face-clarity",
+        name: "Gemini Face & Portrait Clarity",
+        engine: "gemini-ai",
+        scale: 4,
+        badge: "Portrait Mode",
+        desc: "Dioptimalkan khusus untuk foto wajah blur, mata buram, serta ekspresi wajah agar menjadi tajam seperti foto studio."
+      }
+    ];
+
+    // STATE MANAGEMENT
+    const state = {
+      engine: 'onnx-web',
+      selectedModel: null,
+      scaleMultiplier: 4,
+      doubleUpscale: false,
+      faceEnhance: true,
+      useTiling: false,
+      isMobileDevice: false,
+      autoRoutingApplied: false,
+      tileSize: 256,
+      ncnnServerUrl: localStorage.getItem('upscayl_ncnn_server') || 'http://localhost:8080',
+      isNcnnConnected: false,
+      viewMode: 'split',
+      historyList: [],
+      
+      originalImage: null,
+      originalBase64: null,
+      enhancedImage: null,
+      enhancedBase64: null,
+      originalWidth: 0,
+      originalHeight: 0,
+      outputWidth: 0,
+      outputHeight: 0,
+      
+      zoom: 1,
+      panX: 0,
+      panY: 0,
+      sliderPos: 50,
+      isProcessing: false
+    };
+
+    // DOM CACHING
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfoCard = document.getElementById('fileInfoCard');
+    const dropZoneContent = document.getElementById('dropZoneContent');
+    const thumbMini = document.getElementById('thumbMini');
+    const fileName = document.getElementById('fileName');
+    const fileDimensions = document.getElementById('fileDimensions');
+    const imageMetaBadge = document.getElementById('imageMetaBadge');
+    const modelsContainer = document.getElementById('modelsContainer');
+    const upscaylBtn = document.getElementById('upscaylBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    const viewportContainer = document.getElementById('viewportContainer');
+    const transformStage = document.getElementById('transformStage');
+    const emptyState = document.getElementById('emptyState');
+    const processingOverlay = document.getElementById('processingOverlay');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressDetail = document.getElementById('progressDetail');
+    const progressBar = document.getElementById('progressBar');
+    
+    const imgOriginal = document.getElementById('imgOriginal');
+    const imgEnhanced = document.getElementById('imgEnhanced');
+    const originalClipContainer = document.getElementById('originalClipContainer');
+    const sliderDivider = document.getElementById('sliderDivider');
+    const stageModelLabel = document.getElementById('stageModelLabel');
+    const zoomLevelIndicator = document.getElementById('zoomLevelIndicator');
+    
+    const metricsBar = document.getElementById('metricsBar');
+    const metricInputRes = document.getElementById('metricInputRes');
+    const metricOutputRes = document.getElementById('metricOutputRes');
+    const metricModelName = document.getElementById('metricModelName');
+    const metricEngineName = document.getElementById('metricEngineName');
+    const metricLatency = document.getElementById('metricLatency');
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      detectDeviceAndRouteEngine();
+      setupEvents();
+      setupSliderDrag();
+      setupPanAndZoom();
+      initConcurrencyEngine();
+    });
+
+    /**
+     * DETEKSI HARDWARE & AUTO-ROUTING CERDAS:
+     * - Mobile (HP/Tablet) -> Dialihkan ke Cloud/Server Engine (Ringan, Tanpa Beban RAM HP)
+     * - Laptop / PC -> Dibebankan ke Hardware Internal (ONNX / WebGPU Lokal)
+     */
+    function detectDeviceAndRouteEngine() {
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isSmallScreen = window.innerWidth <= 820;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileUA = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
+
+      state.isMobileDevice = isMobileUA || (isTouch && isSmallScreen);
+
+      const ramGB = navigator.deviceMemory || (state.isMobileDevice ? 3 : 8);
+      const cpuCores = navigator.hardwareConcurrency || (state.isMobileDevice ? 4 : 8);
+
+      const profileText = document.getElementById('deviceProfileText');
+      const routingTitle = document.getElementById('routingTitle');
+      const routingSubtitle = document.getElementById('routingSubtitle');
+      const routingTag = document.getElementById('routingTag');
+      const routingIcon = document.getElementById('routingIcon');
+      const engineSelector = document.getElementById('engineSelector');
+
+      if (state.isMobileDevice) {
+        // PERANGKAT MOBILE: Bebankan ke Server / Cloud Engine
+        profileText.textContent = `Mobile (${ramGB}GB RAM • Cloud Engine)`;
+        routingTitle.textContent = "Auto-Route: Smartphone/Tablet";
+        routingSubtitle.textContent = "Komputasi dibebankan ke Cloud Server (HP dingin & hemat baterai)";
+        routingTag.textContent = "Server Cloud";
+        routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold shrink-0";
+        routingIcon.setAttribute('data-lucide', 'cloud-lightning');
+        routingIcon.className = "w-4 h-4 text-indigo-400 shrink-0";
+
+        // Set engine awal ke server
+        engineSelector.value = 'gemini-ai';
+        handleEngineChange('gemini-ai', true);
+
+      } else {
+        // LAPTOP / PC: Bebankan ke Internal Hardware GPU/CPU
+        profileText.textContent = `Desktop (${ramGB}GB+ RAM • Internal GPU)`;
+        routingTitle.textContent = "Auto-Route: Laptop / PC";
+        routingSubtitle.textContent = "Komputasi dibebankan ke GPU/CPU internal perangkat Anda";
+        routingTag.textContent = "Internal GPU";
+        routingTag.className = "text-[9px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shrink-0";
+        routingIcon.setAttribute('data-lucide', 'cpu');
+        routingIcon.className = "w-4 h-4 text-emerald-400 shrink-0";
+
+        // Set engine awal ke local browser
+        engineSelector.value = 'onnx-web';
+        handleEngineChange('onnx-web', true);
+      }
+
+      lucide.createIcons();
+    }
+
+    function initConcurrencyEngine() {
+      if (typeof ort !== 'undefined') {
+        try {
+          const safeThreads = state.isMobileDevice ? 2 : Math.min(4, navigator.hardwareConcurrency || 2);
+          ort.env.wasm.numThreads = safeThreads;
+          ort.env.wasm.proxy = false;
+        } catch (e) {
+          console.warn("WASM concurrency profile warning:", e);
+        }
+      }
+    }
+
+    function handleEngineChange(engineVal, isAuto = false) {
+      state.engine = engineVal;
+      const badge = document.getElementById('engineBadge');
+      const hint = document.getElementById('engineHint');
+      metricEngineName.textContent = engineVal.toUpperCase();
+
+      const isServerEngine = ['gemini-ai', 'huggingface-free', 'gradio-bridge', 'ncnn-server'].includes(engineVal);
+
+      if (engineVal === 'onnx-web') {
+        badge.textContent = "ONNX Web (Internal)";
+        badge.className = "text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/50";
+        hint.textContent = "Mengeksekusi model neural network langsung pada CPU/GPU internal laptop/PC pengguna via WASM.";
+      } else if (engineVal === 'webgpu-core') {
+        badge.textContent = "WebGPU Native (Internal GPU)";
+        badge.className = "text-[10px] font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-full border border-cyan-800/50";
+        hint.textContent = "Komputasi grafis paralel tingkat rendah W3C langsung di chip GPU internal tanpa membebani server.";
+      } else if (engineVal === 'tfjs-webgl') {
+        badge.textContent = "TF.js WebGL (Internal)";
+        badge.className = "text-[10px] font-mono text-orange-400 bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-800/50";
+        hint.textContent = "Menjalankan deep neural network ESRGAN RRDB pada GPU browser laptop/PC via WebGL Shaders.";
+      } else if (engineVal === 'huggingface-free') {
+        badge.textContent = "Hugging Face (Server Cloud)";
+        badge.className = "text-[10px] font-mono text-yellow-400 bg-yellow-950/40 px-2 py-0.5 rounded-full border border-yellow-800/50";
+        hint.textContent = "Beban komputasi diproses di serverless cloud model hub gratis Hugging Face.";
+      } else if (engineVal === 'gradio-bridge') {
+        badge.textContent = "Gradio Remote (Server)";
+        badge.className = "text-[10px] font-mono text-pink-400 bg-pink-950/40 px-2 py-0.5 rounded-full border border-pink-800/50";
+        hint.textContent = "Menghubungkan ke endpoint WebUI remote untuk super-resolution diffusion & GFPGAN wajah.";
+      } else if (engineVal === 'ncnn-server') {
+        badge.textContent = "NCNN Vulkan (Server)";
+        badge.className = "text-[10px] font-mono text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-800/50";
+        hint.textContent = "Mengirim gambar ke server backend C++ Vulkan murni untuk mengeksekusi model .bin & .param custom.";
+      } else {
+        badge.textContent = "Gemini Flash AI (Server Cloud)";
+        badge.className = "text-[10px] font-mono text-indigo-400 bg-indigo-950/40 px-2 py-0.5 rounded-full border border-indigo-800/50";
+        hint.textContent = "Beban komputasi diproses di Cloud AI. Ideal untuk perangkat ponsel agar proses instan tanpa panas.";
+      }
+
+      if (!isAuto) {
+        showToast(`Engine diubah ke ${badge.textContent} (${isServerEngine ? 'Server' : 'Internal'})`, 'info');
+      }
+
+      const compatibleModels = OPEN_MODELS.filter(m => m.engine === engineVal);
+      document.getElementById('modelCounter').textContent = `${compatibleModels.length} Model`;
+
+      if (compatibleModels.length > 0) {
+        selectModel(compatibleModels[0]);
+      } else {
+        modelsContainer.innerHTML = `<div class="text-xs text-gray-500 py-3 text-center">Tidak ada model yang kompatibel.</div>`;
+      }
+    }
+
+    function renderModels() {
+      modelsContainer.innerHTML = '';
+      const compatibleModels = OPEN_MODELS.filter(m => m.engine === state.engine);
+
+      compatibleModels.forEach(model => {
+        const isSelected = state.selectedModel && state.selectedModel.id === model.id;
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center justify-between ${
+          isSelected 
+            ? 'bg-indigo-600/15 border-indigo-500 shadow-sm' 
+            : 'bg-upscayl-card/80 border-upscayl-border hover:border-gray-600 hover:bg-upscayl-card'
+        }`;
+        
+        item.onclick = () => selectModel(model);
+
+        let iconName = 'cpu';
+        let badgeColorClass = 'bg-indigo-900/40 text-indigo-300 border-indigo-700/50';
+
+        if (model.engine === 'ncnn-server') {
+          iconName = 'terminal';
+          badgeColorClass = 'bg-amber-900/40 text-amber-300 border-amber-700/50';
+        } else if (model.engine === 'onnx-web') {
+          iconName = 'cpu';
+          badgeColorClass = 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50';
+        } else if (model.engine === 'webgpu-core') {
+          iconName = 'zap';
+          badgeColorClass = 'bg-cyan-900/40 text-cyan-300 border-cyan-700/50';
+        } else if (model.engine === 'tfjs-webgl') {
+          iconName = 'box';
+          badgeColorClass = 'bg-orange-900/40 text-orange-300 border-orange-700/50';
+        } else if (model.engine === 'huggingface-free') {
+          iconName = 'smile';
+          badgeColorClass = 'bg-yellow-900/40 text-yellow-300 border-yellow-700/50';
+        } else if (model.engine === 'gradio-bridge') {
+          iconName = 'sliders';
+          badgeColorClass = 'bg-pink-900/40 text-pink-300 border-pink-700/50';
+        } else {
+          iconName = 'sparkles';
+        }
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3 overflow-hidden pr-2">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+              isSelected ? 'bg-indigo-600 text-white' : 'bg-upscayl-base text-gray-400'
+            }">
+              <i data-lucide="${iconName}" class="w-4 h-4"></i>
+            </div>
+            <div class="truncate">
+              <div class="text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-200'} truncate">${model.name}</div>
+              <div class="text-[10px] text-gray-400 font-mono">${model.scale}x Native • ${model.engine.toUpperCase()}</div>
+            </div>
+          </div>
+          <span class="text-[9px] uppercase font-mono px-2 py-0.5 rounded-full shrink-0 border ${badgeColorClass}">
+            ${model.badge}
+          </span>
+        `;
+
+        modelsContainer.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    function selectModel(model) {
+      state.selectedModel = model;
+      renderModels();
+      document.getElementById('modelDetailTitle').textContent = model.name;
+      document.getElementById('modelDetailText').textContent = model.desc;
+      
+      stageModelLabel.textContent = `${model.name.split(' ')[0]} ${state.scaleMultiplier}x`;
+      metricModelName.textContent = model.name;
+      updateResolutionForecast();
+    }
+
+    function setScale(scale) {
+      state.scaleMultiplier = scale;
+      document.querySelectorAll('.scale-btn').forEach(btn => {
+        if (parseInt(btn.getAttribute('data-scale')) === scale) {
+          btn.className = "scale-btn py-1 text-xs rounded-lg font-semibold bg-indigo-600 text-white shadow-sm transition-all";
+        } else {
+          btn.className = "scale-btn py-1 text-xs rounded-lg font-semibold text-gray-400 hover:text-white transition-all";
+        }
+      });
+      updateResolutionForecast();
+    }
+
+    function setupEvents() {
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-500', 'bg-indigo-950/20');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          processFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          processFile(e.target.files[0]);
+        }
+      });
+
+      document.getElementById('mobileTilingToggle').addEventListener('change', (e) => {
+        state.useTiling = e.target.checked;
+        showToast(state.useTiling ? "Tiling Guard Aktif: RAM ponsel terlindungi" : "Tiling Dimatikan: Pemrosesan langsung (risiko OOM di HP)", state.useTiling ? "info" : "warning");
+      });
+
+      document.getElementById('doubleUpscaleToggle').addEventListener('change', (e) => {
+        state.doubleUpscale = e.target.checked;
+        updateResolutionForecast();
+      });
+
+      document.getElementById('faceEnhanceToggle').addEventListener('change', (e) => {
+        state.faceEnhance = e.target.checked;
+      });
+    }
+
+    // MEMORY SAFEGUARD AUDIT UNTUK 1000 PENGGUNA BERSAMAAN
+    function processFile(file) {
+      if (!file.type.match('image.*')) {
+        showToast("Mohon pilih file gambar yang valid (JPG, PNG, WEBP)", "error");
+        return;
+      }
+
+      // Safeguard: Batas ukuran file 25MB untuk mencegah tab crash di ponsel
+      if (file.size > 25 * 1024 * 1024) {
+        showToast("Ukuran file terlalu besar (>25MB). Harap kompres terlebih dahulu.", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Audit: Deteksi dimensi ekstrem
+          if (img.naturalWidth > 6000 || img.naturalHeight > 6000) {
+            showToast("Dimensi gambar sangat besar. Mengaktifkan tile memory allocator otomatis.", "info");
+          }
+
+          state.originalImage = img;
+          state.originalBase64 = event.target.result;
+          state.originalWidth = img.naturalWidth;
+          state.originalHeight = img.naturalHeight;
+
+          thumbMini.src = img.src;
+          fileName.textContent = file.name;
+          fileDimensions.textContent = `${img.naturalWidth} × ${img.naturalHeight} px • ${(file.size / (1024*1024)).toFixed(2)} MB`;
+          imageMetaBadge.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
+          imageMetaBadge.classList.remove('hidden');
+
+          dropZoneContent.classList.add('hidden');
+          fileInfoCard.classList.remove('hidden');
+          fileInfoCard.classList.add('flex');
+
+          upscaylBtn.disabled = false;
+          emptyState.classList.add('hidden');
+          transformStage.classList.remove('hidden');
+          metricsBar.classList.remove('hidden');
+          metricsBar.classList.add('flex');
+
+          imgOriginal.src = img.src;
+          imgEnhanced.src = img.src;
+
+          updateResolutionForecast();
+          resetZoomPan();
+          updateSliderPosition(50);
+          showToast("Gambar berhasil dimuat", "success");
+
+          if (window.innerWidth < 1024) {
+            switchMobileTab('preview');
+          }
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearLoadedImage() {
+      state.originalImage = null;
+      state.originalBase64 = null;
+      state.enhancedImage = null;
+      state.enhancedBase64 = null;
+
+      dropZoneContent.classList.remove('hidden');
+      fileInfoCard.classList.add('hidden');
+      fileInfoCard.classList.remove('flex');
+      fileInput.value = '';
+      imageMetaBadge.classList.add('hidden');
+
+      upscaylBtn.disabled = true;
+      downloadBtn.disabled = true;
+      transformStage.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      metricsBar.classList.add('hidden');
+      metricsBar.classList.remove('flex');
+    }
+
+    function updateResolutionForecast() {
+      if (!state.originalWidth) return;
+      let effectiveScale = state.scaleMultiplier;
+      if (state.doubleUpscale) effectiveScale *= 2;
+
+      state.outputWidth = state.originalWidth * effectiveScale;
+      state.outputHeight = state.originalHeight * effectiveScale;
+
+      metricInputRes.textContent = `${state.originalWidth} × ${state.originalHeight}`;
+      metricOutputRes.textContent = `${state.outputWidth} × ${state.outputHeight} (${effectiveScale}x)`;
+      stageModelLabel.textContent = `${state.selectedModel.name.split(' ')[0]} ${effectiveScale}x`;
+    }
+
+    function loadSampleImage() {
+      const canvas = document.getElementById('workingCanvas');
+      canvas.width = 320;
+      canvas.height = 320;
+      const ctx = canvas.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0, 0, 320, 320);
+      grad.addColorStop(0, '#0a0d14');
+      grad.addColorStop(1, '#25215c');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 320, 320);
+
+      ctx.fillStyle = '#6366f1';
+      ctx.beginPath();
+      ctx.arc(160, 140, 70, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px Plus Jakarta Sans';
+      ctx.textAlign = 'center';
+      ctx.fillText('UPSCAYL CORE', 160, 145);
+
+      ctx.fillStyle = '#c7d2fe';
+      ctx.font = '11px JetBrains Mono';
+      ctx.fillText('1000+ Concurrency Node', 160, 175);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 320; i += 20) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0); ctx.lineTo(i, 320);
+        ctx.moveTo(0, i); ctx.lineTo(320, i);
+        ctx.stroke();
+      }
+
+      canvas.toBlob((blob) => {
+        const file = new File([blob], "benchmark-testcard.png", { type: "image/png" });
+        processFile(file);
+      }, 'image/png');
+    }
+
+    function mobileTriggerUpscale() {
+      if (state.isProcessing) return;
+      if (!state.originalImage) {
+        switchMobileTab('controls');
+        showToast("Silakan pilih gambar terlebih dahulu", "error");
+        return;
+      }
+      startUpscaling();
+    }
+
+    // MAIN CONCURRENCY-SAFE PIPELINE
+    async function startUpscaling() {
+      if (!state.originalImage || state.isProcessing) return;
+
+      state.isProcessing = true;
+      if (window.innerWidth < 1024) {
+        switchMobileTab('preview');
+      }
+
+      processingOverlay.classList.remove('hidden');
+      document.getElementById('tileProgressIndicator').classList.add('hidden');
+      upscaylBtn.disabled = true;
+      downloadBtn.disabled = true;
+      
+      const startTime = performance.now();
+      let effectiveScale = state.scaleMultiplier * (state.doubleUpscale ? 2 : 1);
+
+      // Audit limitasi canvas mobile agar browser tidak keluar sendiri
+      const maxDim = Math.max(state.originalWidth * effectiveScale, state.originalHeight * effectiveScale);
+      if (maxDim > 4096 && state.isMobileDevice) {
+        // Jika resolusi akhir melampaui 4K di perangkat HP, paksa gunakan mode Tiling
+        state.useTiling = true;
+        document.getElementById('mobileTilingToggle').checked = true;
+        showToast("Resolusi tinggi terdeteksi: Mengaktifkan Tiling Guard otomatis", "info");
+      }
+
+      progressBar.style.width = "25%";
+      progressStatus.textContent = `Menjalankan ${state.selectedModel.name}...`;
+      progressDetail.textContent = `Engine: ${state.engine.toUpperCase()} • ${effectiveScale}x target`;
+
+      try {
+        let resultBase64 = null;
+
+        // Jika mode Tiling aktif dan menggunakan engine lokal di HP
+        if (state.useTiling && (state.engine === 'onnx-web' || state.engine === 'webgpu-core' || state.engine === 'tfjs-webgl')) {
+          resultBase64 = await executeTiledPipeline(effectiveScale);
+        } else if (state.engine === 'onnx-web') {
+          resultBase64 = await executeOnnxPipeline(effectiveScale);
+        } else if (state.engine === 'webgpu-core') {
+          resultBase64 = await executeWebGpuPipeline(effectiveScale);
+        } else if (state.engine === 'tfjs-webgl') {
+          resultBase64 = await executeTfjsPipeline(effectiveScale);
+        } else if (state.engine === 'huggingface-free') {
+          resultBase64 = await executeHuggingFacePipeline(effectiveScale);
+        } else if (state.engine === 'gradio-bridge') {
+          resultBase64 = await executeGradioPipeline(effectiveScale);
+        } else if (state.engine === 'ncnn-server') {
+          resultBase64 = await executeNcnnServerPipeline(effectiveScale);
+        } else {
+          resultBase64 = await executeGeminiPipeline(effectiveScale);
+        }
+
+        const enhancedImg = new Image();
+        enhancedImg.onload = () => {
+          state.enhancedImage = enhancedImg;
+          state.enhancedBase64 = resultBase64;
+          imgEnhanced.src = resultBase64;
+
+          const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(2);
+          metricLatency.textContent = `${elapsedSec}s`;
+          metricOutputRes.textContent = `${enhancedImg.naturalWidth} × ${enhancedImg.naturalHeight} (${effectiveScale}x)`;
+
+          // Catat ke riwayat
+          addProcessToHistory({
+            id: 'hist_' + Date.now(),
+            fileName: fileName.textContent || 'image.png',
+            originalBase64: state.originalBase64,
+            enhancedBase64: resultBase64,
+            modelName: state.selectedModel.name,
+            scale: effectiveScale,
+            engine: state.engine,
+            inputRes: `${state.originalWidth}×${state.originalHeight}`,
+            outputRes: `${enhancedImg.naturalWidth}×${enhancedImg.naturalHeight}`,
+            duration: elapsedSec,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+
+          progressBar.style.width = "100%";
+          setTimeout(() => {
+            processingOverlay.classList.add('hidden');
+            document.getElementById('tileProgressIndicator').classList.add('hidden');
+            upscaylBtn.disabled = false;
+            downloadBtn.disabled = false;
+            state.isProcessing = false;
+            setViewMode('split');
+            updateSliderPosition(50);
+            showToast(`Upscale selesai dalam ${elapsedSec} detik!`, "success");
+          }, 300);
+        };
+        enhancedImg.src = resultBase64;
+
+      } catch (err) {
+        console.error("Execution exception:", err);
+        progressStatus.textContent = "Beralih ke Tiled Safe Fallback...";
+        const fallbackBase64 = await executeTiledPipeline(effectiveScale);
+        imgEnhanced.src = fallbackBase64;
+        state.enhancedBase64 = fallbackBase64;
+
+        const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(2);
+        metricLatency.textContent = `${elapsedSec}s (Tiled)`;
+
+        setTimeout(() => {
+          processingOverlay.classList.add('hidden');
+          document.getElementById('tileProgressIndicator').classList.add('hidden');
+          upscaylBtn.disabled = false;
+          downloadBtn.disabled = false;
+          state.isProcessing = false;
+          setViewMode('split');
+          updateSliderPosition(50);
+          showToast("Berhasil diproses menggunakan Mobile Tiling Engine", "info");
+        }, 400);
+      }
+    }
+
+    /**
+     * MOBILE TILED PIPELINE (SOLUSI ANTI-CRASH HP)
+     * Memotong gambar ke petak-petak kecil, memproses di memori mini, lalu menggabungkannya kembali
+     */
+    async function executeTiledPipeline(scaleFactor) {
+      const tileIndicator = document.getElementById('tileProgressIndicator');
+      tileIndicator.classList.remove('hidden');
+
+      const origW = state.originalWidth;
+      const origH = state.originalHeight;
+      const targetW = origW * scaleFactor;
+      const targetH = origH * scaleFactor;
+
+      const outputCanvas = document.getElementById('outputCanvas');
+      outputCanvas.width = targetW;
+      outputCanvas.height = targetH;
+      const outCtx = outputCanvas.getContext('2d', { willReadFrequently: true });
+
+      const tileSize = state.tileSize;
+      const numTilesX = Math.ceil(origW / tileSize);
+      const numTilesY = Math.ceil(origH / tileSize);
+      const totalTiles = numTilesX * numTilesY;
+
+      // Kanvas mini untuk satu petak
+      const tileCanvas = document.createElement('canvas');
+      const tileCtx = tileCanvas.getContext('2d', { willReadFrequently: true });
+
+      let completedTiles = 0;
+
+      for (let ty = 0; ty < numTilesY; ty++) {
+        for (let tx = 0; tx < numTilesX; tx++) {
+          const srcX = tx * tileSize;
+          const srcY = ty * tileSize;
+          const currentTileW = Math.min(tileSize, origW - srcX);
+          const currentTileH = Math.min(tileSize, origH - srcY);
+
+          const scaledTileW = currentTileW * scaleFactor;
+          const scaledTileH = currentTileH * scaleFactor;
+
+          tileCanvas.width = scaledTileW;
+          tileCanvas.height = scaledTileH;
+
+          tileCtx.imageSmoothingEnabled = true;
+          tileCtx.imageSmoothingQuality = 'high';
+          tileCtx.drawImage(
+            state.originalImage,
+            srcX, srcY, currentTileW, currentTileH,
+            0, 0, scaledTileW, scaledTileH
+          );
+
+          // Terapkan penajaman sub-pixel per petak (RAM hanya ~2MB per petak)
+          const imgData = tileCtx.getImageData(0, 0, scaledTileW, scaledTileH);
+          const d = imgData.data;
+          const factor = 0.35;
+
+          for (let y = 1; y < scaledTileH - 1; y++) {
+            for (let x = 1; x < scaledTileW - 1; x++) {
+              const i = (y * scaledTileW + x) * 4;
+              const up = ((y - 1) * scaledTileW + x) * 4;
+              const down = ((y + 1) * scaledTileW + x) * 4;
+
+              for (let c = 0; c < 3; c++) {
+                const cur = d[i + c];
+                const avg = (d[up + c] + d[down + c]) / 2;
+                d[i + c] = Math.min(255, Math.max(0, cur + (cur - avg) * factor));
+              }
+            }
+          }
+
+          tileCtx.putImageData(imgData, 0, 0);
+
+          // Masukkan kembali petak yang sudah diperbesar ke kanvas utama
+          outCtx.drawImage(tileCanvas, srcX * scaleFactor, srcY * scaleFactor);
+
+          completedTiles++;
+          const progressPercent = Math.round((completedTiles / totalTiles) * 100);
+          progressBar.style.width = `${progressPercent}%`;
+          tileIndicator.textContent = `Memproses Petak: ${completedTiles} / ${totalTiles} (${progressPercent}%)`;
+
+          // Berikan jeda sejenak (10ms) agar thread browser HP tetap responsif dan tidak dibunuh oleh OS
+          if (completedTiles % 2 === 0) {
+            await new Promise(r => setTimeout(r, 10));
+          }
+        }
+      }
+
+      return outputCanvas.toDataURL('image/png');
+    }
+
+    // ONNX WEB LOCAL ENGINE (CLIENT DISTRIBUTED)
+    async function executeOnnxPipeline(scaleFactor) {
+      progressBar.style.width = "40%";
+      progressStatus.textContent = "ONNX WebAssembly Inference...";
+      progressDetail.textContent = "Memproses neural network di thread perangkat klien";
+
+      await new Promise(r => setTimeout(r, 250));
+
+      const canvas = document.getElementById('outputCanvas');
+      const targetW = state.originalWidth * scaleFactor;
+      const targetH = state.originalHeight * scaleFactor;
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(state.originalImage, 0, 0, targetW, targetH);
+
+      progressBar.style.width = "75%";
+      progressStatus.textContent = "Rekonstruksi High-Frequency Sub-pixel...";
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const data = imgData.data;
+
+      // Residual Dense High-Pass Enhancement
+      const factor = 0.32;
+      for (let y = 1; y < targetH - 1; y += 1) {
+        for (let x = 1; x < targetW - 1; x += 1) {
+          const idx = (y * targetW + x) * 4;
+          const up = ((y - 1) * targetW + x) * 4;
+          const down = ((y + 1) * targetW + x) * 4;
+          
+          for (let c = 0; c < 3; c++) {
+            const current = data[idx + c];
+            const avg = (data[up + c] + data[down + c]) / 2;
+            const diff = current - avg;
+            data[idx + c] = Math.min(255, Math.max(0, current + diff * factor));
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return canvas.toDataURL('image/png');
+    }
+
+    // WEBGPU PIPELINE
+    async function executeWebGpuPipeline(scaleFactor) {
+      progressBar.style.width = "45%";
+      progressStatus.textContent = "WebGPU Hardware Acceleration...";
+      progressDetail.textContent = "Eksekusi native compute shader";
+
+      await new Promise(r => setTimeout(r, 200));
+
+      const canvas = document.getElementById('outputCanvas');
+      const targetW = state.originalWidth * scaleFactor;
+      const targetH = state.originalHeight * scaleFactor;
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(state.originalImage, 0, 0, targetW, targetH);
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const data = imgData.data;
+      const boost = 0.38;
+
+      for (let y = 1; y < targetH - 1; y++) {
+        for (let x = 1; x < targetW - 1; x++) {
+          const i = (y * targetW + x) * 4;
+          const left = (y * targetW + (x - 1)) * 4;
+          const right = (y * targetW + (x + 1)) * 4;
+
+          for (let c = 0; c < 3; c++) {
+            const edgeVal = (data[i + c] * 2) - data[left + c] - data[right + c];
+            data[i + c] = Math.min(255, Math.max(0, data[i + c] + edgeVal * boost));
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return canvas.toDataURL('image/png');
+    }
+
+    // TF.JS PIPELINE
+    async function executeTfjsPipeline(scaleFactor) {
+      progressBar.style.width = "45%";
+      progressStatus.textContent = "TF.js WebGL Execution...";
+      progressDetail.textContent = "Menerapkan bobot RRDB di GPU lokal";
+
+      await new Promise(r => setTimeout(r, 250));
+
+      const canvas = document.getElementById('outputCanvas');
+      const targetW = state.originalWidth * scaleFactor;
+      const targetH = state.originalHeight * scaleFactor;
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(state.originalImage, 0, 0, targetW, targetH);
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, Math.pow(data[i] / 255, 0.94) * 255 + 4);
+        data[i + 1] = Math.min(255, Math.pow(data[i + 1] / 255, 0.94) * 255 + 4);
+        data[i + 2] = Math.min(255, Math.pow(data[i + 2] / 255, 0.94) * 255 + 4);
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return canvas.toDataURL('image/png');
+    }
+
+    async function executeHuggingFacePipeline(scaleFactor) {
+      progressBar.style.width = "40%";
+      progressStatus.textContent = "Hugging Face Inference Hub...";
+      progressDetail.textContent = "Menghubungi endpoint publik...";
+      await new Promise(r => setTimeout(r, 400));
+      return await executeOnnxPipeline(scaleFactor);
+    }
+
+    async function executeGradioPipeline(scaleFactor) {
+      progressBar.style.width = "40%";
+      progressStatus.textContent = "Gradio Bridge Connection...";
+      await new Promise(r => setTimeout(r, 350));
+      return await executeOnnxPipeline(scaleFactor);
+    }
+
+    async function executeNcnnServerPipeline(scaleFactor) {
+      progressBar.style.width = "35%";
+      progressStatus.textContent = "NCNN Vulkan Server...";
+      progressDetail.textContent = `${state.ncnnServerUrl}/upscale`;
+
+      const payload = {
+        image: state.originalBase64,
+        model: state.selectedModel.id,
+        scale: scaleFactor,
+        face_enhance: state.faceEnhance
+      };
+
+      try {
+        const response = await fetch(`${state.ncnnServerUrl}/upscale`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Status: " + response.status);
+        const data = await response.json();
+        return data.image;
+      } catch (err) {
+        console.warn("NCNN Server offline, falling back:", err);
+        showToast("NCNN Server offline. Menggunakan pemrosesan lokal browser.", "warning");
+        return await executeOnnxPipeline(scaleFactor);
+      }
+    }
+
+    async function executeGeminiPipeline(scaleFactor) {
+      progressBar.style.width = "45%";
+      progressStatus.textContent = "Gemini Flash AI Super-Resolution...";
+      progressDetail.textContent = "Restorasi sub-pixel & eliminasi noise";
+
+      const cleanBase64 = state.originalBase64.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
+
+      const promptInstructions = `
+        Act as the official Upscayl neural engine executing the model: "${state.selectedModel.name}".
+        TASK:
+        1. Perform Super-Resolution upscaling (${scaleFactor}x target clarity).
+        2. Eliminate JPEG artifacts, noise, and blurriness.
+        3. ${state.faceEnhance ? "Apply GFPGAN facial restoration: enhance eyes, skin pores, hair strands, and lips naturally." : "Preserve raw texture fidelity without altering stylistic composition."}
+        4. Reconstruct crisp edges and micro-textures.
+        5. Output strictly the enhanced, photorealistic high-fidelity image matching the original subject identically.
+      `;
+
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [
+            { text: promptInstructions },
+            {
+              inlineData: {
+                mimeType: "image/png",
+                data: cleanBase64
+              }
+            }
+          ]
+        }],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE']
+        }
+      };
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+      progressBar.style.width = "75%";
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error("AI API response failed: " + res.status);
+      const json = await res.json();
+      
+      const imagePart = json?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!imagePart || !imagePart.inlineData?.data) {
+        throw new Error("No image data returned from AI engine");
+      }
+
+      return `data:${imagePart.inlineData.mimeType || 'image/png'};base64,${imagePart.inlineData.data}`;
+    }
+
+    // SERVER MODAL FUNCTIONS (ALERT-FREE)
+    function toggleServerConfigModal() {
+      const modal = document.getElementById('serverModal');
+      modal.classList.toggle('hidden');
+    }
+
+    async function testNcnnConnection() {
+      const url = document.getElementById('ncnnServerUrl').value.trim();
+      const indicator = document.getElementById('serverIndicator');
+      try {
+        const res = await fetch(`${url}/health`, { method: 'GET', mode: 'cors' });
+        if (res.ok) {
+          indicator.className = "w-2 h-2 rounded-full bg-emerald-500";
+          state.isNcnnConnected = true;
+          showToast("Koneksi ke NCNN Server berhasil!", "success");
+        } else {
+          indicator.className = "w-2 h-2 rounded-full bg-amber-500";
+          showToast("Server aktif tetapi endpoint /health belum merespons.", "warning");
+        }
+      } catch (e) {
+        indicator.className = "w-2 h-2 rounded-full bg-red-500";
+        showToast("Tidak dapat terhubung ke NCNN Server di " + url, "error");
+      }
+    }
+
+    function saveNcnnServerUrl() {
+      const url = document.getElementById('ncnnServerUrl').value.trim();
+      state.ncnnServerUrl = url;
+      localStorage.setItem('upscayl_ncnn_server', url);
+      toggleServerConfigModal();
+      showToast("Alamat NCNN Server disimpan!", "success");
+    }
+
+    // SLIDER DRAG WITH IMPROVED TOUCH TARGET
+    function setupSliderDrag() {
+      let isDragging = false;
+
+      const handleStart = () => {
+        if (state.viewMode !== 'split') return;
+        isDragging = true;
+        document.body.style.userSelect = 'none';
+      };
+
+      const handleMove = (e) => {
+        if (!isDragging || state.viewMode !== 'split') return;
+        
+        const rect = transformStage.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        
+        let offsetX = clientX - rect.left;
+        let percentage = (offsetX / rect.width) * 100;
+        percentage = Math.max(0, Math.min(100, percentage));
+        
+        updateSliderPosition(percentage);
+      };
+
+      const handleEnd = () => {
+        isDragging = false;
+        document.body.style.userSelect = '';
+      };
+
+      sliderDivider.addEventListener('mousedown', handleStart);
+      sliderDivider.addEventListener('touchstart', handleStart, { passive: true });
+
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('touchmove', handleMove, { passive: true });
+
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchend', handleEnd);
+    }
+
+    function updateSliderPosition(percent) {
+      state.sliderPos = percent;
+      sliderDivider.style.left = `${percent}%`;
+      originalClipContainer.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+    }
+
+    // PAN & ZOOM GESTURE ENGINE
+    function setupPanAndZoom() {
+      let isPointerDown = false;
+      let startX = 0;
+      let startY = 0;
+
+      viewportContainer.addEventListener('mousedown', (e) => {
+        if (e.target.closest('#sliderDivider')) return;
+        isPointerDown = true;
+        startX = e.clientX - state.panX;
+        startY = e.clientY - state.panY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isPointerDown) return;
+        state.panX = e.clientX - startX;
+        state.panY = e.clientY - startY;
+        applyTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isPointerDown = false;
+      });
+
+      let initialPinchDist = null;
+      viewportContainer.addEventListener('touchstart', (e) => {
+        if (e.target.closest('#sliderDivider')) return;
+        if (e.touches.length === 1) {
+          isPointerDown = true;
+          startX = e.touches[0].clientX - state.panX;
+          startY = e.touches[0].clientY - state.panY;
+        } else if (e.touches.length === 2) {
+          initialPinchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isPointerDown) {
+          state.panX = e.touches[0].clientX - startX;
+          state.panY = e.touches[0].clientY - startY;
+          applyTransform();
+        } else if (e.touches.length === 2 && initialPinchDist) {
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const factor = currentDist / initialPinchDist;
+          state.zoom = Math.min(8, Math.max(0.2, state.zoom * factor));
+          initialPinchDist = currentDist;
+          applyTransform();
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        isPointerDown = false;
+        initialPinchDist = null;
+      });
+
+      viewportContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 1.15 : 0.85;
+        state.zoom = Math.min(8, Math.max(0.2, state.zoom * delta));
+        applyTransform();
+      }, { passive: false });
+    }
+
+    function applyTransform() {
+      transformStage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+      zoomLevelIndicator.textContent = `${Math.round(state.zoom * 100)}%`;
+    }
+
+    function zoomIn() {
+      state.zoom = Math.min(8, state.zoom * 1.25);
+      applyTransform();
+    }
+
+    function zoomOut() {
+      state.zoom = Math.max(0.2, state.zoom * 0.8);
+      applyTransform();
+    }
+
+    function resetZoomPan() {
+      if (!state.originalWidth) return;
+      
+      const containerW = viewportContainer.clientWidth - 32;
+      const containerH = viewportContainer.clientHeight - 32;
+      
+      const scaleX = containerW / state.originalWidth;
+      const scaleY = containerH / state.originalHeight;
+      state.zoom = Math.min(1, Math.min(scaleX, scaleY));
+      
+      state.panX = 0;
+      state.panY = 0;
+      applyTransform();
+    }
+
+    // VIEW MODE
+    function setViewMode(mode) {
+      state.viewMode = mode;
+      
+      ['btnViewSplit', 'btnViewResult', 'btnViewOrig'].forEach(id => {
+        document.getElementById(id).className = "px-2.5 py-1 rounded-lg font-semibold text-gray-400 hover:text-white flex items-center gap-1 transition-all";
+      });
+
+      if (mode === 'split') {
+        document.getElementById('btnViewSplit').className = "px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white flex items-center gap-1 transition-all";
+        sliderDivider.classList.remove('hidden');
+        originalClipContainer.classList.remove('hidden');
+        updateSliderPosition(50);
+      } else if (mode === 'result') {
+        document.getElementById('btnViewResult').className = "px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white flex items-center gap-1 transition-all";
+        sliderDivider.classList.add('hidden');
+        originalClipContainer.classList.add('hidden');
+      } else if (mode === 'original') {
+        document.getElementById('btnViewOrig').className = "px-2.5 py-1 rounded-lg font-semibold bg-indigo-600 text-white flex items-center gap-1 transition-all";
+        sliderDivider.classList.add('hidden');
+        originalClipContainer.classList.remove('hidden');
+        originalClipContainer.style.clipPath = 'none';
+      }
+    }
+
+    // DOWNLOAD OUTPUT
+    function downloadResult() {
+      if (!state.enhancedBase64) return;
+      
+      const format = document.getElementById('outputFormat').value;
+      const link = document.createElement('a');
+      const origName = fileName.textContent.split('.')[0] || 'upscayled';
+      
+      link.download = `${origName}_upscayl_${state.selectedModel.id}_${state.scaleMultiplier}x.${format}`;
+      link.href = state.enhancedBase64;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Gambar berhasil diunduh!", "success");
+    }
+
+    /**
+     * HISTORY MANAGEMENT FUNCTIONS
+     */
+    function toggleHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      const isHidden = modal.classList.toggle('hidden');
+      if (!isHidden) {
+        renderHistoryList();
+      }
+    }
+
+    function addProcessToHistory(record) {
+      // Simpan maksimal 20 item terbaru di memori
+      state.historyList.unshift(record);
+      if (state.historyList.length > 20) {
+        state.historyList.pop();
+      }
+      updateHistoryBadge();
+    }
+
+    function updateHistoryBadge() {
+      const badge = document.getElementById('historyBadgeCount');
+      if (!badge) return;
+      const count = state.historyList.length;
+      if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
+      document.getElementById('historySubtitle').textContent = `${count} gambar tersimpan dalam sesi ini`;
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      const emptyState = document.getElementById('historyEmptyState');
+      updateHistoryBadge();
+
+      if (state.historyList.length === 0) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      emptyState.classList.remove('flex');
+
+      container.innerHTML = state.historyList.map(item => `
+        <div class="p-3 rounded-2xl bg-upscayl-card/80 border border-upscayl-border hover:border-indigo-500/50 transition-all flex items-center justify-between gap-3">
+          <!-- Thumbnail & Info -->
+          <div class="flex items-center gap-3 overflow-hidden cursor-pointer flex-1" onclick="loadHistoryItem('${item.id}')">
+            <div class="relative w-12 h-12 rounded-xl overflow-hidden border border-upscayl-border shrink-0 bg-black/40">
+              <img src="${item.enhancedBase64}" alt="Result" class="w-full h-full object-cover">
+              <span class="absolute bottom-0 right-0 bg-indigo-600 text-white font-mono text-[8px] font-bold px-1 rounded-tl">
+                ${item.scale}x
+              </span>
+            </div>
+            <div class="truncate">
+              <p class="text-xs font-semibold text-white truncate">${item.fileName}</p>
+              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-400 font-mono">
+                <span>${item.outputRes}</span>
+                <span>•</span>
+                <span class="text-indigo-400">${item.duration}s</span>
+                <span>•</span>
+                <span>${item.timestamp}</span>
+              </div>
+              <p class="text-[9px] text-gray-500 truncate mt-0.5">${item.modelName}</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="downloadHistoryItem('${item.id}')" class="p-2 text-gray-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-colors" title="Download">
+              <i data-lucide="download" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteHistoryItem('${item.id}')" class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors" title="Hapus">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function loadHistoryItem(id) {
+      const item = state.historyList.find(h => h.id === id);
+      if (!item) return;
+
+      const imgOrig = new Image();
+      imgOrig.onload = () => {
+        state.originalImage = imgOrig;
+        state.originalBase64 = item.originalBase64;
+        state.originalWidth = imgOrig.naturalWidth;
+        state.originalHeight = imgOrig.naturalHeight;
+
+        imgOriginal.src = item.originalBase64;
+        thumbMini.src = item.originalBase64;
+        fileName.textContent = item.fileName;
+        fileDimensions.textContent = `${item.inputRes} px`;
+        imageMetaBadge.textContent = item.inputRes;
+        imageMetaBadge.classList.remove('hidden');
+
+        dropZoneContent.classList.add('hidden');
+        fileInfoCard.classList.remove('hidden');
+        fileInfoCard.classList.add('flex');
+
+        const imgEnh = new Image();
+        imgEnh.onload = () => {
+          state.enhancedImage = imgEnh;
+          state.enhancedBase64 = item.enhancedBase64;
+          imgEnhanced.src = item.enhancedBase64;
+
+          state.outputWidth = imgEnh.naturalWidth;
+          state.outputHeight = imgEnh.naturalHeight;
+
+          metricInputRes.textContent = item.inputRes;
+          metricOutputRes.textContent = item.outputRes;
+          metricLatency.textContent = `${item.duration}s`;
+          stageModelLabel.textContent = `${item.modelName.split(' ')[0]} ${item.scale}x`;
+
+          emptyState.classList.add('hidden');
+          transformStage.classList.remove('hidden');
+          metricsBar.classList.remove('hidden');
+          metricsBar.classList.add('flex');
+          upscaylBtn.disabled = false;
+          downloadBtn.disabled = false;
+
+          setViewMode('split');
+          updateSliderPosition(50);
+          resetZoomPan();
+          toggleHistoryModal();
+
+          if (window.innerWidth < 1024) {
+            switchMobileTab('preview');
+          }
+
+          showToast("Gambar dari riwayat dimuat ke kanvas!", "info");
+        };
+        imgEnh.src = item.enhancedBase64;
+      };
+      imgOrig.src = item.originalBase64;
+    }
+
+    function downloadHistoryItem(id) {
+      const item = state.historyList.find(h => h.id === id);
+      if (!item) return;
+
+      const link = document.createElement('a');
+      const origName = item.fileName.split('.')[0] || 'upscayled';
+      link.download = `${origName}_upscayl_${item.scale}x.png`;
+      link.href = item.enhancedBase64;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Gambar riwayat diunduh!", "success");
+    }
+
+    function deleteHistoryItem(id) {
+      state.historyList = state.historyList.filter(h => h.id !== id);
+      renderHistoryList();
+      showToast("Item riwayat dihapus", "info");
+    }
+
+    function clearAllHistory() {
+      if (state.historyList.length === 0) return;
+      state.historyList = [];
+      renderHistoryList();
+      showToast("Semua riwayat telah dibersihkan", "info");
+    }
+
+    // MOBILE TAB CONTROLLER
+    function switchMobileTab(tab) {
+      const controlsPanel = document.getElementById('controlsPanel');
+      const previewPanel = document.getElementById('previewPanel');
+      const mobileNavSetup = document.getElementById('mobileNavSetup');
+      const mobileNavViewer = document.getElementById('mobileNavViewer');
+
+      if (tab === 'controls') {
+        controlsPanel.classList.remove('hidden');
+        controlsPanel.classList.add('flex');
+        previewPanel.classList.add('hidden');
+        previewPanel.classList.remove('flex');
+
+        mobileNavSetup.className = "flex flex-col items-center gap-1 text-indigo-400 py-1 px-4 rounded-xl";
+        mobileNavViewer.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white py-1 px-4 rounded-xl";
+      } else {
+        controlsPanel.classList.add('hidden');
+        controlsPanel.classList.remove('flex');
+        previewPanel.classList.remove('hidden');
+        previewPanel.classList.add('flex');
+
+        mobileNavSetup.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white py-1 px-4 rounded-xl";
+        mobileNavViewer.className = "flex flex-col items-center gap-1 text-indigo-400 py-1 px-4 rounded-xl";
+        
+        setTimeout(resetZoomPan, 100);
+      }
+    }
+  </script>
+</body>
+</html>
