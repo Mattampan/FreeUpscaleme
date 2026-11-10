@@ -3,1108 +3,1388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Free Upscale Me - AI Image Upscaler & Enhancer</title>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Google Font & FontAwesome Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Free Upscale Me - AI & Local Super Resolution</title>
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
+  <!-- Tailwind CSS (Clean Compiled Classes) -->
   <style>
-    * {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+    *,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}
+    :after,:before{--tw-content:""}
+    html{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif;color-scheme:dark}
+    body{margin:0;line-height:inherit;background-color:#080d1a;color:#f3f4f6}
+    hr{height:0;color:inherit;border-top-width:1px}
+    button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;margin:0;padding:0}
+    button,select{text-transform:none}
+    button,[role=button]{cursor:pointer}
+    :disabled{cursor:default}
+    img,svg{display:block;vertical-align:middle;max-width:100%;height:auto}
+    .fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}
+    .inset-0{inset:0}.bottom-0{bottom:0}.left-0{left:0}.right-0{right:0}.top-0{top:0}
+    .left-1\/2{left:50%}.top-1\/2{top:50%}.left-3{left:.75rem}.right-3{right:.75rem}.top-3{top:.75rem}.top-4{top:1rem}.right-4{right:1rem}.right-6{right:1.5rem}.top-1\.5{top:.375rem}
+    .z-10{z-index:10}.z-20{z-index:20}.z-40{z-index:40}.z-50{z-index:50}
+    .mx-auto{margin-left:auto;margin-right:auto}
+    .mb-1{margin-bottom:.25rem}.mb-1\.5{margin-bottom:.375rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}
+    .mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-auto{margin-top:auto}
+    .block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}
+    .h-2{height:.5rem}.h-4{height:1rem}.h-6{height:1.5rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-10{height:2.5rem}.h-11{height:2.75rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-full{height:100%}
+    .h-\[calc\(100vh-61px\)\]{height:calc(100vh - 61px)}
+    .max-h-\[85vh\]{max-height:85vh}.max-h-full{max-height:100%}.min-h-screen{min-height:100vh}
+    .w-0{width:0}.w-0\.5{width:.125rem}.w-4{width:1rem}.w-6{width:1.5rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-10{width:2.5rem}.w-16{width:4rem}.w-full{width:100%}
+    .max-w-full{max-width:100%}.max-w-sm{max-width:24rem}.max-w-md{max-width:28rem}.max-w-lg{max-width:32rem}.max-w-none{max-width:none}
+    .flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}
+    .-translate-x-1\/2{transform:translateX(-50%)}
+    .-translate-y-1\/2{transform:translateY(-50%)}
+    .translate-center{transform:translate(-50%, -50%)}
+    .cursor-ew-resize{cursor:ew-resize}.cursor-pointer{cursor:pointer}.select-none{user-select:none}
+    .grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}
+    .items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}
+    .gap-0\.5{gap:.125rem}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
+    .space-y-2>:not([hidden])~:not([hidden]){margin-top:.5rem}
+    .space-y-2\.5>:not([hidden])~:not([hidden]){margin-top:.625rem}
+    .space-y-3>:not([hidden])~:not([hidden]){margin-top:.75rem}
+    .space-y-4>:not([hidden])~:not([hidden]){margin-top:1rem}
+    .overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.overflow-x-hidden{overflow-x:hidden}
+    .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.break-words{overflow-wrap:break-word}
+    .rounded{border-radius:.25rem}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}
+    .border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}
+    .border-gray-700{border-color:#374151}.border-gray-800{border-color:#1f2937}.border-gray-800\/80{border-color:rgba(31,41,55,.8)}
+    .border-indigo-500{border-color:#6366f1}.border-indigo-500\/20{border-color:rgba(99,102,241,.2)}.border-indigo-500\/30{border-color:rgba(99,102,241,.3)}.border-indigo-500\/50{border-color:rgba(99,102,241,.5)}
+    .border-emerald-500\/30{border-color:rgba(16,185,129,.3)}.border-emerald-500\/50{border-color:rgba(16,185,129,.5)}
+    .border-rose-500\/30{border-color:rgba(244,63,94,.3)}.border-rose-500\/50{border-color:rgba(244,63,94,.5)}.border-white{border-color:#fff}
+    .bg-gray-800{background-color:#1f2937}.bg-gray-900{background-color:#111827}.bg-gray-900\/40{background-color:rgba(17,24,39,.4)}.bg-gray-900\/80{background-color:rgba(17,24,39,.8)}.bg-gray-900\/90{background-color:rgba(17,24,39,.9)}.bg-gray-950\/95{background-color:rgba(3,7,18,.95)}
+    .bg-black\/70{background-color:rgba(0,0,0,.7)}.bg-black\/80{background-color:rgba(0,0,0,.8)}
+    .bg-indigo-600{background-color:#4f46e5}.bg-indigo-600\/20{background-color:rgba(79,70,229,.2)}.bg-indigo-600\/30{background-color:rgba(79,70,229,.3)}.bg-indigo-600\/80{background-color:rgba(79,70,229,.8)}.bg-indigo-500\/20{background-color:rgba(99,102,241,.2)}.bg-indigo-950\/90{background-color:rgba(30,27,75,.9)}
+    .bg-emerald-600{background-color:#059669}.bg-emerald-500\/20{background-color:rgba(16,185,129,.2)}.bg-emerald-950\/90{background-color:rgba(2,44,34,.9)}
+    .bg-rose-600\/20{background-color:rgba(225,29,72,.2)}.bg-rose-950\/90{background-color:rgba(76,5,25,.9)}.bg-white{background-color:#fff}
+    .bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}
+    .bg-gradient-to-tr{background-image:linear-gradient(to top right,var(--tw-gradient-stops))}
+    .from-indigo-600{--tw-gradient-from:#4f46e5;--tw-gradient-stops:var(--tw-gradient-from),rgba(79,70,229,0)}
+    .from-indigo-500{--tw-gradient-from:#6366f1;--tw-gradient-stops:var(--tw-gradient-from),rgba(99,102,241,0)}
+    .via-indigo-500{--tw-gradient-stops:var(--tw-gradient-from),#6366f1,var(--tw-gradient-to)}
+    .via-indigo-100{--tw-gradient-stops:var(--tw-gradient-from),#e0e7ff,var(--tw-gradient-to)}
+    .from-white{--tw-gradient-from:#fff;--tw-gradient-stops:var(--tw-gradient-from),rgba(255,255,255,0)}
+    .to-violet-600{--tw-gradient-to:#7c3aed}.to-violet-500{--tw-gradient-to:#8b5cf6}.to-indigo-300{--tw-gradient-to:#a5b4fc}
+    .bg-clip-text{-webkit-background-clip:text;background-clip:text}.object-cover{object-fit:cover}
+    .p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}
+    .px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}
+    .py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}
+    .pb-20{padding-bottom:5rem}.pt-1{padding-top:.25rem}.pt-1\.5{padding-top:.375rem}.pt-2{padding-top:.5rem}
+    .text-center{text-align:center}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xs{font-size:.75rem;line-height:1rem}
+    .text-\[9px\]{font-size:9px}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}
+    .font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}
+    .uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}
+    .text-white{color:#fff}.text-transparent{color:transparent}
+    .text-gray-100{color:#f3f4f6}.text-gray-200{color:#e5e7eb}.text-gray-300{color:#d1d5db}.text-gray-400{color:#9ca3af}.text-gray-500{color:#6b7280}.text-gray-600{color:#4b5563}
+    .text-indigo-200{color:#c7d2fe}.text-indigo-300{color:#a5b4fc}.text-indigo-400{color:#818cf8}.text-indigo-600{color:#4f46e5}
+    .text-emerald-200{color:#a7f3d0}.text-emerald-400{color:#34d153}.text-amber-300{color:#fcd34d}.text-amber-400{color:#fbbf24}
+    .text-rose-200{color:#fecdd3}.text-rose-300{color:#fda4af}.text-rose-400{color:#fb7185}.text-violet-400{color:#a78bfa}
+    .shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1)}
+    .shadow-xl{box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1)}
+    .shadow-2xl{box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
+    .shadow-indigo-500\/30{box-shadow:0 10px 15px -3px rgba(99,102,241,.3)}
+    .shadow-indigo-600\/30{box-shadow:0 10px 15px -3px rgba(79,70,229,.3)}
+    .backdrop-blur-sm{-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+    .backdrop-blur-md{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+    .backdrop-blur-lg{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+    .transition{transition:all .15s cubic-bezier(.4,0,.2,1)}
+    .hover\:border-indigo-500:hover{border-color:#6366f1}.hover\:border-indigo-500\/50:hover{border-color:rgba(99,102,241,.5)}.hover\:border-indigo-500\/80:hover{border-color:rgba(99,102,241,.8)}
+    .hover\:bg-gray-700:hover{background-color:#374151}.hover\:bg-gray-800:hover{background-color:#1f2937}.hover\:bg-gray-800\/40:hover{background-color:rgba(31,41,55,.4)}.hover\:bg-gray-900\/80:hover{background-color:rgba(17,24,39,.8)}
+    .hover\:bg-indigo-500:hover{background-color:#6366f1}.hover\:bg-emerald-500:hover{background-color:#10b981}.hover\:bg-rose-600\/30:hover{background-color:rgba(225,29,72,.3)}
+    .hover\:text-white:hover{color:#fff}.hover\:text-indigo-300:hover{color:#a5b4fc}.hover\:text-rose-300:hover{color:#fda4af}.hover\:text-rose-400:hover{color:#fb7185}
+    .hover\:underline:hover{text-decoration:underline}
+    .focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}
+    .focus\:border-indigo-500:focus{border-color:#6366f1}
+    .active\:scale-\[0\.99\]:active{transform:scale(.99)}
+    .disabled\:opacity-40:disabled{opacity:.4}
+    .group:hover .group-hover\:-translate-y-0\.5{transform:translateY(-0.125rem)}
+    .group:hover .group-hover\:text-indigo-400{color:#818cf8}
+    @media (min-width:640px){.sm\:block{display:block}.sm\:inline{display:inline}}
+    @media (min-width:768px){
+      .md\:hidden{display:none}
+      .md\:flex-row{flex-direction:row}
+      .md\:h-\[calc\(100vh-61px\)\]{height:calc(100vh - 61px)}
+      .md\:w-\[420px\]{width:420px}
+      .md\:border-r{border-right-width:1px}
+      .md\:p-5{padding:1.25rem}.md\:p-6{padding:1.5rem}
+      .md\:pb-0{padding-bottom:0}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}
     }
-    
-    /* Custom scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-
-    .glass-card {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .checkered-bg {
-      background-color: #0b0f19;
-      background-image: 
-        linear-gradient(45deg, #131b2e 25%, transparent 25%), 
-        linear-gradient(-45deg, #131b2e 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #131b2e 75%), 
-        linear-gradient(-45deg, transparent 75%, #131b2e 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-    }
+    @media (min-width:1024px){.lg\:w-\[460px\]{width:460px}}
+    /* Custom Scrollbar & Touch Surface */
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#0b0f19}
+    ::-webkit-scrollbar-thumb{background:#1f293d;border-radius:4px}
+    .glass-card{background:rgba(15,23,42,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .slider-handle{box-shadow:0 0 15px rgba(99,102,241,.7)}
+    .touch-canvas{touch-action:none;-webkit-user-select:none;user-select:none}
   </style>
 </head>
-<body class="bg-gray-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-20 md:pb-0">
+<body class="bg-[#080d1a] text-gray-100 min-h-screen flex flex-col font-sans antialiased overflow-x-hidden pb-20 md:pb-0">
 
-  <!-- ========================================== -->
-  <!-- TOAST NOTIFICATION CONTAINER -->
-  <!-- ========================================== -->
-  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4"></div>
-
-  <!-- ========================================== -->
-  <!-- HEADER APP BAR -->
-  <!-- ========================================== -->
-  <header class="sticky top-0 z-40 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
-          <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base font-extrabold tracking-tight text-white">Free Upscale Me</h1>
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              100% Gratis
-            </span>
-          </div>
-          <p class="text-[10px] text-gray-400 hidden sm:block">AI Super-Resolution & Typography Restorer</p>
-        </div>
+  <!-- ================= TOP APP BAR ================= -->
+  <header class="glass-card sticky top-0 z-40 border-b border-gray-800/80 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <i class="fa-solid fa-wand-magic-sparkles text-white text-base"></i>
       </div>
-
-      <!-- Action & Auth Header Controls -->
-      <div class="flex items-center gap-2">
-        <div id="authHeaderContainer">
-          <button id="btnOpenAuthModal" onclick="openAuthModal('login')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/30 hover:brightness-110 transition-all">
-            <i class="fa-solid fa-user-circle text-xs"></i>
-            <span>Masuk / Daftar</span>
-          </button>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-base md:text-lg tracking-tight bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">Free Upscale Me</h1>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-bold">100% GRATIS</span>
         </div>
-
-        <div id="deviceBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="deviceProfileText">Gemini 3.1 Flash AI Ready</span>
-        </div>
+        <p class="text-[10px] text-gray-400 hidden sm:block">AI Cloud & Local High-Fidelity Super Resolution</p>
       </div>
+    </div>
+
+    <!-- Header Actions (Direct API Key Settings) -->
+    <div class="flex items-center gap-2">
+      <button onclick="openSettingsModal()" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-gray-900 border border-gray-800 hover:border-indigo-500/50 text-xs font-semibold text-gray-200 transition">
+        <i class="fa-solid fa-key text-amber-400 text-[11px]"></i>
+        <span class="hidden sm:inline">API Key</span>
+        <span id="keyStatusDot" class="text-[10px] text-amber-400 font-medium">○</span>
+      </button>
     </div>
   </header>
 
-  <!-- ========================================== -->
-  <!-- MAIN LAYOUT -->
-  <!-- ========================================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col md:flex-row gap-5">
-    
-    <!-- LEFT SIDEBAR: STEP-BY-STEP CONTROLS -->
-    <div id="setupSidebar" class="w-full md:w-96 flex flex-col gap-4 order-1 md:order-1">
+  <!-- ================= MAIN LAYOUT ================= -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+    <!-- TAB KIRI: PANEL PENGATURAN -->
+    <aside id="setupPanel" class="w-full md:w-[420px] lg:w-[460px] md:border-r border-gray-800/80 flex flex-col overflow-y-auto p-4 md:p-5 gap-4 md:h-[calc(100vh-61px)]">
       
-      <!-- STEP 1: UPLOAD GAMBAR -->
+      <!-- STEP 1: IMPORT GAMBAR -->
       <div class="glass-card rounded-2xl p-4 border border-gray-800 shadow-xl relative overflow-hidden">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center">1</span>
-            <h2 class="text-xs font-bold uppercase tracking-wider text-gray-200">Pilih Gambar</h2>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-gray-200">Pilih / Unggah Gambar</h2>
           </div>
-          <button onclick="loadSampleDemoImage()" class="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
-            <i class="fa-solid fa-image"></i> Coba Demo
+          <button onclick="loadDemoImage()" class="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition">
+            <i class="fa-solid fa-flask"></i> Coba Demo
           </button>
         </div>
 
-        <!-- Hidden Input File -->
-        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelected(event)">
-
-        <!-- Dropzone Container -->
-        <div id="dropZone" onclick="triggerFileInputClick()" class="border-2 border-dashed border-gray-700 hover:border-indigo-500 bg-gray-900/50 hover:bg-gray-900 rounded-xl p-5 text-center cursor-pointer transition-all group flex flex-col items-center justify-center min-h-[140px]">
-          <div class="w-12 h-12 rounded-xl bg-gray-800 group-hover:bg-indigo-600/20 text-gray-400 group-hover:text-indigo-400 flex items-center justify-center mb-2 transition-all">
-            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
-          </div>
-          <p class="text-xs font-semibold text-gray-200 group-hover:text-white">Sentuh atau Tarik Gambar ke Sini</p>
-          <p class="text-[10px] text-gray-400 mt-1">Mendukung JPG, PNG, WEBP, Screenshot UI (Maks 25MB)</p>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden">
+        <div id="dropzoneBox" onclick="triggerFileInputClick()" class="border-2 border-dashed border-gray-700 hover:border-indigo-500/80 rounded-xl p-5 text-center cursor-pointer transition bg-gray-900/40 hover:bg-gray-900/80 group">
+          <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 group-hover:text-indigo-400 mb-2 transition transform group-hover:-translate-y-0.5"></i>
+          <p class="text-xs font-semibold text-gray-200">Sentuh atau Seret Gambar ke Sini</p>
+          <p class="text-[11px] text-gray-500 mt-1">Mendukung JPG, PNG, WEBP, screenshot UI (Maks 25MB)</p>
         </div>
 
-        <!-- File Info Badge (Jika sudah pilih gambar) -->
-        <div id="fileInfoBox" class="hidden mt-3 p-2.5 rounded-xl bg-gray-900/90 border border-gray-800 flex items-center justify-between">
-          <div class="flex items-center gap-2.5 overflow-hidden">
-            <img id="fileThumbSmall" src="" class="w-10 h-10 object-cover rounded-lg border border-gray-700">
-            <div class="overflow-hidden">
-              <p id="fileNameText" class="text-xs font-bold text-white truncate max-w-[160px]">image.png</p>
-              <p id="fileDimText" class="text-[10px] text-gray-400">1080 x 1920 • 240 KB</p>
+        <!-- Info Gambar Terpilih -->
+        <div id="imageMetaCard" class="hidden mt-3 p-3 rounded-xl bg-gray-900/80 border border-gray-800 flex items-center justify-between">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <img id="thumbPreview" class="w-10 h-10 rounded-lg object-cover border border-gray-700 flex-shrink-0" src="" alt="Thumbnail">
+            <div class="truncate">
+              <p id="imageMetaName" class="text-xs font-semibold text-gray-200 truncate">foto.png</p>
+              <p id="imageMetaDimensions" class="text-[10px] text-indigo-400">0 x 0 px</p>
             </div>
           </div>
-          <button onclick="triggerFileInputClick()" class="p-2 text-gray-400 hover:text-white text-xs">
-            <i class="fa-solid fa-arrows-rotate"></i>
+          <button onclick="resetImageSelection(event)" class="text-gray-400 hover:text-rose-400 p-1.5 transition text-xs" title="Hapus Gambar">
+            <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
       </div>
 
-      <!-- STEP 2: ENGINE PEMROSESAN -->
+      <!-- STEP 2: PILIH ENGINE & MODEL -->
       <div class="glass-card rounded-2xl p-4 border border-gray-800 shadow-xl">
         <div class="flex items-center gap-2 mb-3">
           <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center">2</span>
           <h2 class="text-xs font-bold uppercase tracking-wider text-gray-200">Pilih Super-Resolution Engine</h2>
         </div>
 
-        <div class="space-y-2">
-          <select id="engineSelector" onchange="handleEngineChange()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
-            <option value="gemini_vision" selected>✨ Gemini 3.1 Flash AI (Rekonstruksi Teks & Detail Mikro)</option>
-            <option value="local_neural">⚡ Local Neural Laplacian Engine (Tanpa Internet / Instan)</option>
-          </select>
-          <p id="engineHintText" class="text-[10px] text-indigo-400/90 leading-relaxed px-1">
-            Menggunakan model Gemini Flash Image untuk mengenali font, membaca teks yang buram, dan merekonstruksinya menjadi tajam.
-          </p>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1.5">Model AI & Pipeline Eksekusi</label>
+            <select id="engineSelector" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition">
+              <optgroup label="🌟 Google Gemini AI (Cloud Generative - Wajib Key Akun)">
+                <option value="gemini-3.1-flash-image" selected>Gemini 3.1 Flash Image (Nano-Banana 2 - Teks & Foto)</option>
+                <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image (Cepat & Stabil)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash Vision (Auto Contrast & Color)</option>
+              </optgroup>
+              <optgroup label="🤗 Hugging Face Inference API (Cloud Server - Token HF)">
+                <option value="hf_swinir">Hugging Face SwinIR Super-Resolution</option>
+                <option value="hf_realesrgan">Real-ESRGAN x4plus (Community Model)</option>
+              </optgroup>
+              <optgroup label="⚡ Local Open-Source Engines (100% Gratis, Tanpa Kuota, Instan di HP/PC)">
+                <option value="waifu2x_shader">Waifu2x Anime & Vector Pixel Refiner</option>
+                <option value="lanczos3_core">Lanczos-3 Sinc Resampler (Standar GIMP / ImageMagick)</option>
+                <option value="hermite_spline">Adaptive Hermite Spline (Anti-Aliasing Teks & UI)</option>
+                <option value="bilateral_unsharp">Bilateral Denoise + High-Pass Sharpener</option>
+                <option value="local_laplacian">Local Multi-Pass Laplacian Convolution Core</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- KARTU PANDUAN & DESKRIPSI DINAMIS -->
+          <div id="modelGuideCard" class="p-3 rounded-xl bg-gray-900/90 border border-indigo-500/20 text-xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span id="modelGuideTag" class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 flex items-center gap-1">
+                <i class="fa-solid fa-sparkles text-[9px]"></i> AI Generatif Cloud
+              </span>
+              <span id="modelQuotaStatus" class="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
+                <i class="fa-solid fa-key text-[9px]"></i> Memerlukan API Key
+              </span>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Paling Optimal Untuk:</p>
+              <p id="modelOptimalFor" class="text-xs font-semibold text-white mt-0.5">Tangkapan Layar (UI Screenshot), Teks Font Buram, dan Foto Wajah</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Karakteristik & Mekanisme:</p>
+              <p id="modelDescription" class="text-[11px] text-gray-300 leading-relaxed mt-0.5">Membaca tipografi teks yang pecah, melakukan interpolasi sub-pixel dan merender ulang teks agar kembali tajam.</p>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-gray-400 pt-1.5 border-t border-gray-800">
+              <span id="modelSpeed"><i class="fa-solid fa-gauge-high text-amber-400"></i> Kecepatan: Sedang (~4-8 dtk)</span>
+              <span id="modelHardware"><i class="fa-solid fa-cloud text-indigo-400"></i> Beban: Cloud Server</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- STEP 3: SKALA & PENGATURAN TAMBAHAN -->
+      <!-- STEP 3: SKALA & OPSI PENINGKATAN -->
       <div class="glass-card rounded-2xl p-4 border border-gray-800 shadow-xl">
         <div class="flex items-center gap-2 mb-3">
           <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center">3</span>
-          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-200">Skala & Peningkatan</h2>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-200">Faktor Pembesaran (Scale)</h2>
         </div>
 
-        <!-- Scale Buttons -->
-        <label class="block text-[11px] font-semibold text-gray-300 mb-1.5">Faktor Pembesaran (Scale)</label>
         <div class="grid grid-cols-3 gap-2 mb-3">
-          <button type="button" onclick="setScale(2)" id="btnScale2" class="py-2 text-xs font-bold rounded-xl border border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-300 transition-all">2x</button>
-          <button type="button" onclick="setScale(4)" id="btnScale4" class="py-2 text-xs font-bold rounded-xl border border-indigo-500 bg-indigo-600/30 text-indigo-300 transition-all shadow-md shadow-indigo-600/20">4x (Bagus)</button>
-          <button type="button" onclick="setScale(8)" id="btnScale8" class="py-2 text-xs font-bold rounded-xl border border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-300 transition-all">8x (Ultra)</button>
+          <button type="button" onclick="setScaleFactor(2)" class="scale-btn py-2 rounded-xl border border-gray-700 bg-gray-900 text-xs font-bold text-gray-300 hover:border-indigo-500 transition" data-scale="2">2x</button>
+          <button type="button" onclick="setScaleFactor(4)" class="scale-btn active-scale py-2 rounded-xl border border-indigo-500 bg-indigo-600/30 text-xs font-bold text-indigo-300 transition" data-scale="4">4x (Bagus)</button>
+          <button type="button" onclick="setScaleFactor(8)" class="scale-btn py-2 rounded-xl border border-gray-700 bg-gray-900 text-xs font-bold text-gray-300 hover:border-indigo-500 transition" data-scale="8">8x (Ultra)</button>
         </div>
 
-        <!-- Toggles -->
-        <div class="space-y-2 pt-1 border-t border-gray-800">
-          <label class="flex items-center justify-between p-2 rounded-xl bg-gray-900/60 border border-gray-800 cursor-pointer">
-            <span class="text-xs font-medium text-gray-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-face-smile text-indigo-400 text-xs"></i> Face Enhancement
+        <div class="space-y-2 pt-1 border-t border-gray-800/80">
+          <label class="flex items-center justify-between text-xs text-gray-300 cursor-pointer p-1 rounded-lg hover:bg-gray-800/40">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-face-smile text-indigo-400"></i> Face Enhancement
             </span>
-            <input type="checkbox" id="checkFaceEnhance" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-0 bg-gray-950 border-gray-700">
+            <input type="checkbox" id="chkFaceEnhance" checked class="w-4 h-4 rounded text-indigo-600 bg-gray-800 border-gray-700 focus:ring-0">
           </label>
-
-          <label class="flex items-center justify-between p-2 rounded-xl bg-gray-900/60 border border-gray-800 cursor-pointer">
-            <span class="text-xs font-medium text-gray-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-font text-purple-400 text-xs"></i> De-blur Text & UI Mode
+          <label class="flex items-center justify-between text-xs text-gray-300 cursor-pointer p-1 rounded-lg hover:bg-gray-800/40">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-font text-violet-400"></i> De-blur Text & UI Mode
             </span>
-            <input type="checkbox" id="checkTextMode" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-0 bg-gray-950 border-gray-700">
+            <input type="checkbox" id="chkTextMode" checked class="w-4 h-4 rounded text-indigo-600 bg-gray-800 border-gray-700 focus:ring-0">
           </label>
         </div>
       </div>
 
       <!-- STEP 4: TOMBOL EKSEKUSI -->
-      <button id="btnExecuteUpscale" onclick="startUpscaleProcess()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:brightness-110 active:scale-[0.99] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
-        <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
-        <span>Upscale Gambar Sekarang</span>
-      </button>
+      <div class="mt-auto pt-2">
+        <button id="btnStartUpscale" onclick="startUpscaleProcess()" class="w-full py-3.5 px-4 rounded-xl font-extrabold text-xs tracking-wider uppercase bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-600/30 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt text-amber-300"></i>
+          <span>Upscale Gambar Sekarang</span>
+        </button>
 
-      <!-- PROGRESS STATUS BOX -->
-      <div id="progressBox" class="hidden glass-card rounded-2xl p-4 border border-indigo-500/40 bg-indigo-950/20">
-        <div class="flex items-center justify-between text-xs font-bold text-white mb-2">
-          <span id="progressStatus" class="flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-notch fa-spin text-indigo-400"></i> Memproses...
-          </span>
-          <span id="progressPercent">0%</span>
+        <!-- Progress Container -->
+        <div id="progressBox" class="hidden mt-3 p-3 rounded-xl bg-gray-900 border border-indigo-500/30">
+          <div class="flex items-center justify-between text-xs font-semibold text-indigo-300 mb-1.5">
+            <span id="progressText" class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Memproses Resolusi...
+            </span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+            <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-violet-500 h-full w-0 transition-all duration-200"></div>
+          </div>
+          <p id="progressSubtext" class="text-[10px] text-gray-400 mt-1 truncate">Menjalankan neural pipeline...</p>
         </div>
-        <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300" style="width: 0%"></div>
-        </div>
-        <p id="progressDetail" class="text-[10px] text-gray-400 mt-2 truncate">Menyiapkan model AI...</p>
       </div>
 
-    </div>
+    </aside>
 
-    <!-- RIGHT/MAIN AREA: BEFORE/AFTER SPLIT COMPARISON VIEWER -->
-    <div id="viewerContainer" class="flex-1 flex flex-col glass-card rounded-2xl border border-gray-800 shadow-2xl overflow-hidden order-2 md:order-2 min-h-[460px] md:min-h-[600px]">
+    <!-- TAB KANAN: VIEWER CANVAS -->
+    <main id="previewPanel" class="flex-1 flex flex-col bg-[#060913] relative overflow-hidden h-[calc(100vh-61px)]">
       
-      <!-- Viewer Top Control Bar -->
-      <div class="px-4 py-2.5 bg-gray-900/90 border-b border-gray-800 flex items-center justify-between flex-wrap gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-sliders text-indigo-400"></i> Split Comparison
+      <!-- Top Control Bar Viewer -->
+      <div class="h-11 border-b border-gray-800/80 px-4 flex items-center justify-between bg-gray-900/40 text-xs">
+        <div class="flex items-center gap-2 text-gray-400">
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-300">
+            <i class="fa-solid fa-table-columns text-indigo-400"></i> Split Compare
           </span>
-          <span id="viewerResBadge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            Original ➔ Upscaled
-          </span>
+          <span class="text-gray-600">|</span>
+          <span id="canvasResolutionTag" class="text-[10px] bg-gray-800 px-2 py-0.5 rounded text-gray-300">0 x 0 px</span>
         </div>
 
-        <!-- Download & Zoom Controls -->
         <div class="flex items-center gap-2">
-          <button onclick="resetZoomPan()" class="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-arrows-to-dot text-[10px]"></i> Fit
+          <button onclick="resetZoomPan()" class="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition text-xs" title="Reset Posisi">
+            <i class="fa-solid fa-arrows-rotate"></i>
           </button>
-          <button id="btnDownloadResult" onclick="downloadResultImage()" disabled class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all">
-            <i class="fa-solid fa-download"></i> Simpan
+          <button id="btnDownload" onclick="downloadResultImage()" disabled class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-download"></i> Unduh
           </button>
         </div>
       </div>
 
-      <!-- Comparison Canvas Stage -->
-      <div id="stageViewport" class="flex-1 checkered-bg relative overflow-hidden flex items-center justify-center p-2 select-none touch-none">
+      <!-- Canvas Stage & Viewport -->
+      <div id="viewportContainer" class="flex-1 relative overflow-hidden flex items-center justify-center p-2 md:p-6 bg-[#04060c]">
         
-        <!-- Empty State Placeholder -->
-        <div id="emptyStageNotice" class="flex flex-col items-center justify-center text-center p-6 text-gray-500">
-          <div class="w-16 h-16 rounded-2xl bg-gray-900/80 border border-gray-800 flex items-center justify-center text-gray-600 mb-3">
-            <i class="fa-solid fa-photo-film text-2xl"></i>
+        <!-- Placeholder Kosong -->
+        <div id="emptyCanvasPrompt" class="text-center p-6 max-w-sm">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-600 text-2xl">
+            <i class="fa-solid fa-images"></i>
           </div>
-          <p class="text-sm font-semibold text-gray-300">Belum Ada Gambar</p>
-          <p class="text-xs text-gray-500 max-w-xs mt-1">Pilih gambar di panel sebelah kiri atau sentuh "Coba Demo" untuk mulai.</p>
+          <p class="text-sm font-bold text-gray-300">Belum Ada Gambar yang Diproses</p>
+          <p class="text-xs text-gray-500 mt-1">Unggah gambar di panel pengaturan atau coba contoh demo untuk melihat perbandingan ketajaman.</p>
+          <button onclick="loadDemoImage()" class="mt-4 px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-indigo-400 text-xs font-semibold inline-flex items-center gap-2 transition">
+            <i class="fa-solid fa-flask"></i> Buka Gambar Demo
+          </button>
         </div>
 
-        <!-- Transform Wrapper for Pan & Zoom -->
-        <div id="transformStage" class="hidden relative max-w-full max-h-full flex items-center justify-center">
+        <!-- Transform Stage (Zoom & Pan Container) -->
+        <div id="transformStage" class="hidden relative max-w-full max-h-full touch-canvas shadow-2xl rounded-lg overflow-hidden select-none">
           
-          <!-- Layer 1: Enhanced/Upscaled Image (Bottom Layer) -->
-          <img id="imgEnhanced" src="" alt="Enhanced" class="max-w-full max-h-[70vh] object-contain block pointer-events-none rounded-lg shadow-2xl">
+          <!-- Layer 1: Enhanced (Sesudah) -->
+          <img id="imgEnhanced" class="block max-w-none pointer-events-none select-none" src="" alt="Enhanced">
 
-          <!-- Layer 2: Original Image (Top Layer, Clipped) -->
-          <div id="originalClipWrapper" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path: inset(0 50% 0 0);">
-            <img id="imgOriginal" src="" alt="Original" class="w-full h-full object-contain block rounded-lg">
+          <!-- Layer 2: Original (Sebelum) dengan Clip Path -->
+          <div id="originalClipContainer" class="absolute inset-0 overflow-hidden pointer-events-none select-none">
+            <img id="imgOriginal" class="block max-w-none pointer-events-none select-none" src="" alt="Original">
           </div>
 
-          <!-- Split Divider Line & Handle -->
-          <div id="splitHandle" class="absolute top-0 bottom-0 z-30 cursor-ew-resize flex items-center justify-center" style="left: 50%;">
-            <div class="w-0.5 h-full bg-white shadow-[0_0_8px_rgba(0,0,0,0.8)]"></div>
-            <div class="absolute w-8 h-8 rounded-full bg-white text-gray-900 font-bold shadow-xl border-2 border-indigo-600 flex items-center justify-center text-[10px]">
+          <!-- Split Divider Line & Touch Handle -->
+          <div id="sliderDivider" class="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none z-10 cursor-ew-resize">
+            <div class="slider-handle absolute top-1/2 left-1/2 translate-center w-8 h-8 rounded-full bg-indigo-600 border-2 border-white flex items-center justify-center text-white text-[10px] shadow-lg pointer-events-auto cursor-ew-resize">
               <i class="fa-solid fa-arrows-left-right"></i>
             </div>
           </div>
 
-          <!-- Labels -->
-          <div class="absolute top-3 left-3 z-20 pointer-events-none px-2 py-1 rounded bg-black/70 backdrop-blur-md text-[10px] font-bold text-gray-300 border border-white/10">
-            ORIGINAL
-          </div>
-          <div class="absolute top-3 right-3 z-20 pointer-events-none px-2 py-1 rounded bg-indigo-600/80 backdrop-blur-md text-[10px] font-bold text-white border border-indigo-400/30">
-            UPSCALED AI
-          </div>
+          <!-- Labels Before / After -->
+          <div class="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-gray-300 pointer-events-none z-20">SEBELUM</div>
+          <div class="absolute top-3 right-3 bg-indigo-600/80 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white pointer-events-none z-20">SESUDAH (UPSCALE)</div>
         </div>
 
       </div>
 
-    </div>
+    </main>
 
-  </main>
-
-  <!-- ========================================== -->
-  <!-- MOBILE BOTTOM DOCK (NAVIGASI HP) -->
-  <!-- ========================================== -->
-  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800 px-4 py-2 flex items-center justify-around">
-    <button onclick="switchMobileTab('setup')" id="tabBtnSetup" class="flex flex-col items-center gap-1 text-indigo-400 font-bold text-[11px]">
-      <i class="fa-solid fa-sliders text-base"></i>
-      <span>Pengaturan</span>
-    </button>
-    <button onclick="switchMobileTab('preview')" id="tabBtnPreview" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white font-medium text-[11px]">
-      <i class="fa-solid fa-image text-base"></i>
-      <span>Hasil Canvas</span>
-    </button>
-    <button onclick="openHistoryModal()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white font-medium text-[11px] relative">
-      <i class="fa-solid fa-clock-rotate-left text-base"></i>
-      <span>History</span>
-      <span id="historyBadgeMobile" class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center">0</span>
-    </button>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL AUTENTIKASI & DAFTAR AKUN -->
-  <!-- ========================================== -->
-  <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
-        <i class="fa-solid fa-xmark text-lg"></i>
+  <!-- ================= BOTTOM NAVIGATION BAR (KHUSUS MOBILE) ================= -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-gray-950/95 backdrop-blur-lg border-t border-gray-800 flex items-center justify-around z-50 px-2">
+    <button onclick="switchMobileTab('setup')" id="mobileNavSetup" class="flex-1 flex flex-col items-center justify-center gap-0.5 text-indigo-400 font-bold transition">
+      <i class="fa-solid fa-sliders text-base"></i>
+      <span class="text-[10px]">Pengaturan</span>
+    </button>
+    <button onclick="switchMobileTab('preview')" id="mobileNavPreview" class="flex-1 flex flex-col items-center justify-center gap-0.5 text-gray-400 hover:text-white transition">
+      <i class="fa-solid fa-image text-base"></i>
+      <span class="text-[10px]">Hasil Canvas</span>
+    </button>
+    <button onclick="openHistoryModal()" class="flex-1 flex flex-col items-center justify-center gap-0.5 text-gray-400 hover:text-white transition relative">
+      <i class="fa-solid fa-clock-rotate-left text-base"></i>
+      <span class="text-[10px]">History</span>
+      <span id="historyBadge" class="hidden absolute top-1.5 right-6 w-4 h-4 rounded-full bg-indigo-600 text-[9px] font-extrabold text-white flex items-center justify-center">0</span>
+    </button>
+  </nav>
+
+  <!-- ================= MODAL: PENGATURAN API KEY (CLIENT-SIDE ONLY) ================= -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card w-full max-w-md rounded-2xl border border-gray-800 shadow-2xl p-5 relative overflow-hidden">
+      <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-sm transition">
+        <i class="fa-solid fa-xmark"></i>
       </button>
 
-      <!-- Tabs -->
-      <div class="flex items-center gap-2 p-1 bg-gray-950 border border-gray-800 rounded-xl mb-4">
-        <button id="tabAuthLogin" onclick="switchAuthTab('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white">
-          Masuk
-        </button>
-        <button id="tabAuthRegister" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white">
-          Daftar Akun Baru
-        </button>
+      <div class="mb-4 pb-3 border-b border-gray-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-key text-amber-400"></i> Pengaturan API Key</h3>
+        <p class="text-[11px] text-gray-400 mt-1">Kunci hanya disimpan di peramban (browser) Anda sendiri dan dikirim langsung ke penyedia resmi (Google / Hugging Face), tanpa perantara server luar.</p>
       </div>
 
-      <!-- Form Login -->
-      <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
-        <h3 class="text-sm font-bold text-white">Selamat Datang Kembali</h3>
-        <p class="text-[11px] text-gray-400">Masuk untuk menggunakan API Key Gemini pribadi Anda.</p>
-
+      <!-- KEY VAULT SETTINGS -->
+      <div class="space-y-4">
         <div>
-          <label class="block text-[11px] font-semibold text-gray-300 mb-1">Email</label>
-          <input type="email" id="loginEmail" required placeholder="nama@email.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-300 mb-1">Password</label>
-          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-600/30">
-          Masuk ke Akun
-        </button>
-      </form>
-
-      <!-- Form Register -->
-      <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
-        <h3 class="text-sm font-bold text-white">Daftar Akun Gratis</h3>
-        <p class="text-[11px] text-gray-400">Simpan Gemini API Key secara terenkripsi di profil Anda.</p>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-300 mb-1">Nama Lengkap</label>
-          <input type="text" id="regName" required placeholder="Nama Anda" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-300 mb-1">Email</label>
-          <input type="email" id="regEmail" required placeholder="nama@email.com" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-300 mb-1">Password</label>
-          <input type="password" id="regPassword" minlength="6" required placeholder="Min. 6 Karakter" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div class="pt-1">
           <div class="flex items-center justify-between mb-1">
-            <label class="text-[11px] font-semibold text-amber-300 flex items-center gap-1">
-              <i class="fa-solid fa-key text-[10px]"></i> Gemini API Key Pribadi
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-key text-amber-400"></i> Google Gemini API Key
             </label>
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] text-indigo-400 hover:underline">
-              Ambil Gratis <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[11px] text-indigo-400 hover:underline">
+              Ambil Kunci Gratis <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
             </a>
           </div>
-          <input type="password" id="regApiKey" placeholder="AIzaSy... (Opsional/Bisa nanti)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/30">
-          Daftar & Masuk
-        </button>
-      </form>
-
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL PROFILE PENGGUNA -->
-  <!-- ========================================== -->
-  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <div class="flex items-center gap-3 mb-4">
-        <div id="profileAvatar" class="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 font-bold text-lg flex items-center justify-center">
-          U
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 id="profileName" class="text-sm font-bold text-white">User Name</h3>
-            <span id="profileAdminTag" class="hidden px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">ADMIN</span>
+          <div class="flex gap-2">
+            <input type="password" id="vaultGeminiKey" class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono" placeholder="AIzaSy...">
+            <button onclick="testAndVerifyGeminiKey()" class="px-3 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-indigo-300 text-xs font-semibold transition" title="Tes Koneksi Kunci">
+              Cek
+            </button>
           </div>
-          <p id="profileEmail" class="text-xs text-gray-400">email@domain.com</p>
+          <p class="text-[10px] text-gray-500 mt-1">Digunakan untuk model Gemini 3.1 & 2.5 Flash Cloud (kuota gratis akun Google Anda).</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-robot text-violet-400"></i> Hugging Face User Token
+            </label>
+            <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-[11px] text-indigo-400 hover:underline">
+              Ambil Token HF <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          </div>
+          <input type="password" id="vaultHfKey" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono" placeholder="hf_...">
+          <p class="text-[10px] text-gray-500 mt-1">Opsional: untuk mengakses model open-source SwinIR / Real-ESRGAN.</p>
+        </div>
+
+        <div class="pt-2 flex items-center gap-2">
+          <button onclick="saveApiKeysFromVault()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition">
+            Simpan Pengaturan Kunci
+          </button>
+          <button onclick="clearApiKeys()" class="px-4 py-2.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+            Hapus Kunci
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: HISTORY RIWAYAT ================= -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card w-full max-w-lg max-h-[85vh] rounded-2xl border border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-indigo-400 text-sm"></i>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Riwayat Upscale Sesi Ini</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="clearAllHistory()" class="text-[11px] text-rose-400 hover:text-rose-300 transition">
+            Bersihkan
+          </button>
+          <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-white text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
       </div>
 
-      <div class="p-3 bg-gray-950 rounded-xl border border-gray-800 mb-4">
-        <label class="block text-xs font-semibold text-gray-300 mb-1">Gemini API Key Aktif</label>
-        <input type="password" id="profileApiKeyInput" placeholder="AIzaSy..." class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
-        <p class="text-[10px] text-gray-400 mt-1">Key disimpan aman secara lokal di peramban Anda.</p>
-      </div>
-
-      <div class="flex gap-2">
-        <button onclick="handleLogout()" class="px-3 py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-semibold">
-          Keluar
-        </button>
-        <button onclick="handleSaveProfileApiKey()" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md">
-          Simpan API Key
-        </button>
+      <div id="historyListContainer" class="flex-1 overflow-y-auto p-4 space-y-2.5">
+        <!-- Render kartu riwayat -->
       </div>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL HISTORY PROSES -->
-  <!-- ========================================== -->
-  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i> Riwayat Upscale Sesi Ini
-        </h3>
-        <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
+  <!-- ================= NOTIFIKASI TOAST CONTAINER ================= -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-3"></div>
 
-      <div id="historyListContainer" class="flex-1 overflow-y-auto py-3 space-y-2">
-        <!-- Render dinamis kartu riwayat -->
-      </div>
-
-      <div class="pt-3 border-t border-gray-800 flex justify-between items-center">
-        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline">Bersihkan Riwayat</button>
-        <button onclick="closeHistoryModal()" class="px-4 py-1.5 rounded-xl bg-gray-800 text-gray-300 text-xs font-semibold">Tutup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- CORE JAVASCRIPT APPLICATION LOGIC -->
-  <!-- ========================================== -->
+  <!-- ================= APPLICATION LOGIC SCRIPT ================= -->
   <script>
-    // State Aplikasi
+    /* ==========================================================================
+       DATA MODELS, STATE & CONFIGURATION
+       ========================================================================== */
     const state = {
-      originalImage: null,
-      originalBase64: null,
-      enhancedBase64: null,
-      fileName: 'image.png',
+      originalImage: null,        // HTMLImageElement
+      originalDataUrl: null,      // String data:image
+      enhancedDataUrl: null,      // String data:image
+      originalFileName: 'image.png',
+      engine: 'gemini-3.1-flash-image',
       scale: 4,
-      engine: 'gemini_vision',
-      splitPosition: 50,
+      splitPos: 50,
+      zoom: 1,
+      panX: 0,
+      panY: 0,
+      isDraggingSplit: false,
       isProcessing: false,
       history: []
     };
 
-    // User Session
-    let currentUser = null;
+    const modelProfiles = {
+      'gemini-3.1-flash-image': {
+        tag: 'AI Generatif Cloud',
+        tagIcon: 'fa-sparkles',
+        quota: 'Memerlukan Kunci Akun',
+        quotaClass: 'text-amber-400',
+        quotaIcon: 'fa-key',
+        optimal: 'Tangkapan Layar (UI Screenshot), Teks Font Buram, dan Foto Wajah',
+        desc: 'Membaca tipografi teks yang pecah, melakukan interpolasi sub-pixel dan merender ulang teks agar kembali tajam.',
+        speed: 'Sedang (~4-8 dtk)',
+        hardware: 'Cloud Server'
+      },
+      'gemini-2.5-flash-image': {
+        tag: 'AI Generatif Ringan',
+        tagIcon: 'fa-bolt',
+        quota: 'Memerlukan Kunci Akun',
+        quotaClass: 'text-amber-400',
+        quotaIcon: 'fa-key',
+        optimal: 'Foto Produk, Wallpaper, Ilustrasi Grafis Cepat',
+        desc: 'Model cloud generasi ringan yang sangat stabil dan minim latensi untuk rekonstruksi cepat.',
+        speed: 'Cepat (~3-5 dtk)',
+        hardware: 'Cloud Server'
+      },
+      'gemini-2.5-flash': {
+        tag: 'AI Multi-Modal Vision',
+        tagIcon: 'fa-eye',
+        quota: 'Memerlukan Kunci Akun',
+        quotaClass: 'text-amber-400',
+        quotaIcon: 'fa-key',
+        optimal: 'Perbaikan Kontras, Pencahayaan & Rekonstruksi Detail Alami',
+        desc: 'Menganalisis pencahayaan dan rentang warna untuk meregenerasi foto yang gelap atau pudar.',
+        speed: 'Cepat (~3-6 dtk)',
+        hardware: 'Cloud Server'
+      },
+      'hf_swinir': {
+        tag: 'Swin Transformer (HF)',
+        tagIcon: 'fa-brain',
+        quota: 'Token Hugging Face',
+        quotaClass: 'text-violet-400',
+        quotaIcon: 'fa-robot',
+        optimal: 'Fotografi Alami, Tekstur Kain & Pemandangan Alam',
+        desc: 'Arsitektur transformer open-source mutakhir dari Hugging Face untuk super-resolusi fotografi.',
+        speed: 'Tergantung Antrean Cloud',
+        hardware: 'Hugging Face API'
+      },
+      'hf_realesrgan': {
+        tag: 'Real-ESRGAN x4plus (HF)',
+        tagIcon: 'fa-network-wired',
+        quota: 'Token Hugging Face',
+        quotaClass: 'text-violet-400',
+        quotaIcon: 'fa-robot',
+        optimal: 'Pembersihan Artefak Kompresi JPEG Tingkat Tinggi',
+        desc: 'Menghilangkan artefak blok kompresi JPEG berat pada foto lama secara presisi.',
+        speed: 'Tergantung Antrean Cloud',
+        hardware: 'Hugging Face API'
+      },
+      'waifu2x_shader': {
+        tag: 'Local Neural Shader',
+        tagIcon: 'fa-laptop-code',
+        quota: '100% Gratis & Unlimited',
+        quotaClass: 'text-emerald-400',
+        quotaIcon: 'fa-infinity',
+        optimal: 'Gambar Anime, Manga, Vektor 2D, Kartun & Ikon',
+        desc: 'Algoritma open-source spesifik untuk menajamkan outline garis gambar kartun tanpa artefak bergerigi.',
+        speed: 'Instan (~1-2 dtk)',
+        hardware: 'Perangkat Lokal (CPU/GPU)'
+      },
+      'lanczos3_core': {
+        tag: 'Sinc Interpolation (W3C)',
+        tagIcon: 'fa-compass-drafting',
+        quota: '100% Gratis & Unlimited',
+        quotaClass: 'text-emerald-400',
+        quotaIcon: 'fa-infinity',
+        optimal: 'Foto Pemandangan, Arsitektur & Fotografi Presisi Tinggi',
+        desc: 'Standar emas interpolasi fotografi open-source dengan filter windowed sinc 3-lobes untuk ketajaman murni.',
+        speed: 'Instan (< 1 dtk)',
+        hardware: 'Perangkat Lokal (CPU/GPU)'
+      },
+      'hermite_spline': {
+        tag: 'Adaptive Cubic Spline',
+        tagIcon: 'fa-bezier-curve',
+        quota: '100% Gratis & Unlimited',
+        quotaClass: 'text-emerald-400',
+        quotaIcon: 'fa-infinity',
+        optimal: 'Teks Antarmuka, Dokumen & Logo Vektor',
+        desc: 'Interpolasi kubik mulus dengan filter anti-ringing yang mempertahankan ketegasan sudut tipografi teks.',
+        speed: 'Instan (< 1 dtk)',
+        hardware: 'Perangkat Lokal (CPU/GPU)'
+      },
+      'bilateral_unsharp': {
+        tag: 'Bilateral Denoise & Sharp',
+        tagIcon: 'fa-sliders',
+        quota: '100% Gratis & Unlimited',
+        quotaClass: 'text-emerald-400',
+        quotaIcon: 'fa-infinity',
+        optimal: 'Foto Berbintik (Grainy / Low Light) & Potret Malam',
+        desc: 'Menghaluskan area noise tanpa mengaburkan garis tepi objek, dilanjutkan dengan unsharp masking.',
+        speed: 'Sangat Cepat (~1 dtk)',
+        hardware: 'Perangkat Lokal (CPU/GPU)'
+      },
+      'local_laplacian': {
+        tag: 'Multi-Pass Convolution',
+        tagIcon: 'fa-microchip',
+        quota: '100% Gratis & Unlimited',
+        quotaClass: 'text-emerald-400',
+        quotaIcon: 'fa-infinity',
+        optimal: 'Penajaman Garis Tepi Umum Tanpa Akses Internet',
+        desc: 'Mengekstraksi frekuensi tinggi menggunakan kernel Laplacian multi-tahap secara langsung pada kanvas browser.',
+        speed: 'Instan (< 1 dtk)',
+        hardware: 'Perangkat Lokal (CPU/GPU)'
+      }
+    };
 
-    // Inisialisasi awal saat halaman termuat
-    window.addEventListener('DOMContentLoaded', () => {
-      initUserSession();
-      setupSplitSliderEvents();
-      setupDragAndDrop();
-    });
+    /* ==========================================================================
+       API KEY VAULT (Zero-Server, Direct-to-Provider)
+       ========================================================================== */
+    const STORAGE_KEYS = 'free_upscale_me_keys_v1';
+    let apiKeys = { geminiKey: '', hfKey: '' };
 
-    // ------------------------------------------
-    // TOAST NOTIFIKASI RAMAH BROWSER
-    // ------------------------------------------
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      
-      const colors = {
-        success: 'border-emerald-500 bg-emerald-950/90 text-emerald-200',
-        error: 'border-red-500 bg-red-950/90 text-red-200',
-        warning: 'border-amber-500 bg-amber-950/90 text-amber-200',
-        info: 'border-indigo-500 bg-gray-900/90 text-gray-200'
-      };
-
-      const icons = {
-        success: 'fa-circle-check text-emerald-400',
-        error: 'fa-triangle-exclamation text-red-400',
-        warning: 'fa-triangle-exclamation text-amber-400',
-        info: 'fa-circle-info text-indigo-400'
-      };
-
-      toast.className = `pointer-events-auto p-3 rounded-xl border shadow-xl flex items-center gap-2.5 text-xs font-medium transition-all transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
-      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i> <span>${message}</span>`;
-
-      container.appendChild(toast);
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', '-translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
-
-    // ------------------------------------------
-    // AUTENTIKASI & MANAJEMEN AKUN LOKAL AMAN
-    // ------------------------------------------
-    function initUserSession() {
-      // Pastikan akun default Admin (yogaoke2@gmail.com) siap
-      const accounts = JSON.parse(localStorage.getItem('free_upscale_accounts') || '{}');
-      if (!accounts['yogaoke2@gmail.com']) {
-        accounts['yogaoke2@gmail.com'] = {
-          name: "Administrator Yoga",
-          email: "yogaoke2@gmail.com",
-          password: "humaira0808",
-          role: "admin",
-          apiKey: ""
-        };
-        localStorage.setItem('free_upscale_accounts', JSON.stringify(accounts));
+    function loadApiKeys() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS);
+        if (raw) {
+          const k = JSON.parse(raw);
+          apiKeys.geminiKey = typeof k.geminiKey === 'string' ? k.geminiKey : '';
+          apiKeys.hfKey = typeof k.hfKey === 'string' ? k.hfKey : '';
+        }
+      } catch (e) {
+        console.warn('Gagal membaca API key lokal:', e);
       }
 
-      const activeEmail = localStorage.getItem('free_upscale_active_user');
-      if (activeEmail && accounts[activeEmail]) {
-        currentUser = accounts[activeEmail];
-      }
-      renderAuthHeader();
+      // Migrasi data lama dari sistem akun ke model baru
+      try {
+        const oldUsersRaw = localStorage.getItem('free_upscale_me_users_db_v1');
+        const oldSession = localStorage.getItem('free_upscale_me_active_session_v1');
+        if (oldUsersRaw && oldSession) {
+          const u = JSON.parse(oldUsersRaw)[oldSession];
+          if (u && !apiKeys.geminiKey && typeof u.geminiKey === 'string') apiKeys.geminiKey = u.geminiKey;
+          if (u && !apiKeys.hfKey && typeof u.hfKey === 'string') apiKeys.hfKey = u.hfKey;
+          persistApiKeys();
+        }
+        localStorage.removeItem('free_upscale_me_users_db_v1');
+        localStorage.removeItem('free_upscale_me_active_session_v1');
+      } catch (e) { /* ignore */ }
+
+      updateKeyStatus();
     }
 
-    function renderAuthHeader() {
-      const container = document.getElementById('authHeaderContainer');
-      if (currentUser) {
-        const isAdmin = currentUser.role === 'admin';
-        const initial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
-        container.innerHTML = `
-          <button onclick="openProfileModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 border ${isAdmin ? 'border-amber-500/50' : 'border-gray-700'} hover:border-indigo-500 transition-all">
-            <span class="w-5 h-5 rounded-full ${isAdmin ? 'bg-amber-500 text-gray-950 font-black' : 'bg-indigo-600 text-white font-bold'} text-[10px] flex items-center justify-center">
-              ${isAdmin ? '<i class="fa-solid fa-crown text-[8px]"></i>' : initial}
-            </span>
-            <span class="text-white text-xs font-semibold max-w-[90px] truncate">${currentUser.name.split(' ')[0]}</span>
-            <span class="w-2 h-2 rounded-full ${currentUser.apiKey ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse"></span>
-          </button>
-        `;
-      } else {
-        container.innerHTML = `
-          <button onclick="openAuthModal('login')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/30 hover:brightness-110 transition-all">
-            <i class="fa-solid fa-user-circle text-xs"></i>
-            <span>Masuk / Daftar</span>
-          </button>
-        `;
+    function persistApiKeys() {
+      try {
+        localStorage.setItem(STORAGE_KEYS, JSON.stringify(apiKeys));
+      } catch (e) {
+        console.error('Gagal menyimpan API key:', e);
       }
     }
 
-    function openAuthModal(tab = 'login') {
-      document.getElementById('authModal').classList.remove('hidden');
-      switchAuthTab(tab);
+    function updateKeyStatus() {
+      const dot = document.getElementById('keyStatusDot');
+      if (!dot) return;
+      const has = !!apiKeys.geminiKey || !!apiKeys.hfKey;
+      dot.textContent = has ? '●' : '○';
+      dot.className = 'text-[10px] font-medium ' + (has ? 'text-emerald-400' : 'text-amber-400');
     }
 
-    function closeAuthModal() {
-      document.getElementById('authModal').classList.add('hidden');
+    function openSettingsModal() {
+      document.getElementById('vaultGeminiKey').value = apiKeys.geminiKey || '';
+      document.getElementById('vaultHfKey').value = apiKeys.hfKey || '';
+      document.getElementById('settingsModal').classList.remove('hidden');
     }
 
-    function switchAuthTab(tab) {
-      const tabLogin = document.getElementById('tabAuthLogin');
-      const tabReg = document.getElementById('tabAuthRegister');
-      const formLogin = document.getElementById('formLogin');
-      const formReg = document.getElementById('formRegister');
-
-      if (tab === 'login') {
-        tabLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white";
-        tabReg.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white";
-        formLogin.classList.remove('hidden');
-        formReg.classList.add('hidden');
-      } else {
-        tabReg.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white";
-        tabLogin.className = "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white";
-        formReg.classList.remove('hidden');
-        formLogin.classList.add('hidden');
-      }
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
     }
 
-    function handleLoginSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-      const password = document.getElementById('loginPassword').value;
-      const accounts = JSON.parse(localStorage.getItem('free_upscale_accounts') || '{}');
-
-      if (accounts[email] && accounts[email].password === password) {
-        currentUser = accounts[email];
-        localStorage.setItem('free_upscale_active_user', email);
-        closeAuthModal();
-        renderAuthHeader();
-        showToast(`Selamat datang kembali, ${currentUser.name}!`, "success");
-      } else {
-        showToast("Email atau kata sandi tidak cocok!", "error");
-      }
-    }
-
-    function handleRegisterSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim().toLowerCase();
-      const password = document.getElementById('regPassword').value;
-      const apiKey = document.getElementById('regApiKey').value.trim();
-
-      const accounts = JSON.parse(localStorage.getItem('free_upscale_accounts') || '{}');
-      if (accounts[email]) {
-        showToast("Email ini sudah terdaftar! Silakan login.", "warning");
-        switchAuthTab('login');
+    async function testAndVerifyGeminiKey() {
+      const key = document.getElementById('vaultGeminiKey').value.trim();
+      if (!key) {
+        showToast('Masukkan API key terlebih dahulu untuk diuji.', 'error');
         return;
       }
 
-      accounts[email] = {
-        name,
-        email,
-        password,
-        role: email === 'yogaoke2@gmail.com' ? 'admin' : 'member',
-        apiKey
-      };
-
-      localStorage.setItem('free_upscale_accounts', JSON.stringify(accounts));
-      localStorage.setItem('free_upscale_active_user', email);
-      currentUser = accounts[email];
-
-      closeAuthModal();
-      renderAuthHeader();
-      showToast("Pendaftaran berhasil!", "success");
+      showToast('Menguji validitas kunci ke Google AI Studio...', 'info');
+      try {
+        // Menggunakan Header x-goog-api-key demi keamanan
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-goog-api-key': key 
+          },
+          body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
+        });
+        const data = await res.json();
+        if (data.error) {
+          throw new Error(data.error.message || 'API Key tidak valid');
+        }
+        showToast('Koneksi Sukses! Kunci Gemini valid dan aktif.', 'success');
+      } catch (err) {
+        showToast(`Gagal: ${err.message}`, 'error');
+      }
     }
 
-    function openProfileModal() {
-      if (!currentUser) return;
-      document.getElementById('profileAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
-      document.getElementById('profileName').textContent = currentUser.name;
-      document.getElementById('profileEmail').textContent = currentUser.email;
-      document.getElementById('profileApiKeyInput').value = currentUser.apiKey || '';
-
-      const adminTag = document.getElementById('profileAdminTag');
-      if (currentUser.role === 'admin') adminTag.classList.remove('hidden');
-      else adminTag.classList.add('hidden');
-
-      document.getElementById('profileModal').classList.remove('hidden');
+    function saveApiKeysFromVault() {
+      apiKeys.geminiKey = document.getElementById('vaultGeminiKey').value.trim();
+      apiKeys.hfKey = document.getElementById('vaultHfKey').value.trim();
+      persistApiKeys();
+      updateKeyStatus();
+      closeSettingsModal();
+      showToast('API key berhasil disimpan di browser.', 'success');
     }
 
-    function closeProfileModal() {
-      document.getElementById('profileModal').classList.add('hidden');
+    function clearApiKeys() {
+      apiKeys = { geminiKey: '', hfKey: '' };
+      try { localStorage.removeItem(STORAGE_KEYS); } catch (e) {}
+      document.getElementById('vaultGeminiKey').value = '';
+      document.getElementById('vaultHfKey').value = '';
+      updateKeyStatus();
+      showToast('API key telah dihapus dari browser ini.', 'info');
     }
 
-    function handleSaveProfileApiKey() {
-      if (!currentUser) return;
-      const newKey = document.getElementById('profileApiKeyInput').value.trim();
-      currentUser.apiKey = newKey;
-
-      const accounts = JSON.parse(localStorage.getItem('free_upscale_accounts') || '{}');
-      accounts[currentUser.email] = currentUser;
-      localStorage.setItem('free_upscale_accounts', JSON.stringify(accounts));
-
-      closeProfileModal();
-      renderAuthHeader();
-      showToast("API Key berhasil diperbarui!", "success");
-    }
-
-    function handleLogout() {
-      currentUser = null;
-      localStorage.removeItem('free_upscale_active_user');
-      closeProfileModal();
-      renderAuthHeader();
-      showToast("Anda telah keluar.", "info");
-    }
-
-    // ------------------------------------------
-    // FILE HANDLING & DEMO IMAGE
-    // ------------------------------------------
+    /* ==========================================================================
+       IMAGE HANDLING & SELECTION
+       ========================================================================== */
     function triggerFileInputClick() {
-      const fileInput = document.getElementById('fileInput');
-      fileInput.value = '';
-      fileInput.click();
-    }
-
-    function handleFileSelected(event) {
-      const file = event.target.files?.[0];
-      if (file) processSelectedImage(file);
+      const fi = document.getElementById('fileInput');
+      if (fi) {
+        fi.value = '';
+        fi.click();
+      }
     }
 
     function setupDragAndDrop() {
-      const dropZone = document.getElementById('dropZone');
-      ['dragenter', 'dragover'].forEach(name => {
-        dropZone.addEventListener(name, (e) => {
-          e.preventDefault();
-          dropZone.classList.add('border-indigo-500', 'bg-indigo-950/20');
-        });
+      const dropzone = document.getElementById('dropzoneBox');
+      const fileInput = document.getElementById('fileInput');
+      if (!dropzone || !fileInput) return;
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          processSelectedFile(e.target.files[0]);
+        }
       });
-      ['dragleave', 'drop'].forEach(name => {
-        dropZone.addEventListener(name, (e) => {
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
           e.preventDefault();
-          dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/20');
-        });
+          e.stopPropagation();
+          dropzone.classList.add('border-indigo-500', 'bg-gray-900/90');
+        }, false);
       });
-      dropZone.addEventListener('drop', (e) => {
-        const file = e.dataTransfer?.files?.[0];
-        if (file && file.type.startsWith('image/')) processSelectedImage(file);
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove('border-indigo-500', 'bg-gray-900/90');
+        }, false);
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          processSelectedFile(e.dataTransfer.files[0]);
+        }
       });
     }
 
-    function processSelectedImage(file) {
+    function processSelectedFile(file) {
       if (!file.type.startsWith('image/')) {
-        showToast("Format file tidak didukung. Harap pilih gambar JPG/PNG/WEBP.", "error");
+        showToast('Mohon unggah berkas gambar (JPG, PNG, WEBP).', 'error');
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        showToast('Ukuran berkas melebihi batas aman 25MB.', 'error');
         return;
       }
 
-      state.fileName = file.name;
+      state.originalFileName = sanitizeFilename(file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
-        const base64 = e.target.result;
-        loadImageIntoState(base64, file.name, (file.size / 1024).toFixed(0) + " KB");
+        loadInputImage(e.target.result);
       };
+      reader.onerror = () => showToast('Gagal membaca berkas gambar.', 'error');
       reader.readAsDataURL(file);
     }
 
-    function loadSampleDemoImage() {
-      // SVG Test Card dengan teks tajam untuk uji resolusi
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-        <defs>
-          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1e1b4b"/>
-            <stop offset="100%" stop-color="#0f172a"/>
-          </linearGradient>
-        </defs>
-        <rect width="600" height="400" fill="url(#bg)"/>
-        <circle cx="120" cy="120" r="60" fill="#4f46e5" opacity="0.3"/>
-        <circle cx="120" cy="120" r="40" fill="#6366f1"/>
-        <text x="210" y="110" font-family="sans-serif" font-size="28" font-weight="bold" fill="#ffffff">Promo Diskon 75%</text>
-        <text x="210" y="145" font-family="sans-serif" font-size="16" fill="#94a3b8">Kode Kupon: SUPER-UPSCALE-2026</text>
-        <rect x="210" y="170" width="160" height="36" rx="8" fill="#10b981"/>
-        <text x="290" y="194" font-family="sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Klaim Sekarang</text>
-        <text x="60" y="320" font-family="sans-serif" font-size="13" fill="#cbd5e1">✓ Resolusi Teks Mikro Dipertahankan</text>
-        <text x="60" y="345" font-family="sans-serif" font-size="13" fill="#cbd5e1">✓ Pembersihan Anti-Aliasing Blur</text>
-      </svg>`;
-      
-      const base64 = "data:image/svg+xml;base64," + btoa(svg);
-      loadImageIntoState(base64, "Sample-Typography-Card.png", "12 KB");
-      showToast("Contoh kartu tipografi demo berhasil dimuat!", "success");
-    }
-
-    function loadImageIntoState(base64, name, sizeStr) {
+    function loadInputImage(dataUrl) {
       const img = new Image();
       img.onload = () => {
         state.originalImage = img;
-        state.originalBase64 = base64;
-        state.enhancedBase64 = base64; // Default sebelum diproses
+        state.originalDataUrl = dataUrl;
+        state.enhancedDataUrl = dataUrl;
 
-        // Update file info di sidebar
-        document.getElementById('fileThumbSmall').src = base64;
-        document.getElementById('fileNameText').textContent = name;
-        document.getElementById('fileDimText').textContent = `${img.naturalWidth} × ${img.naturalHeight} px • ${sizeStr}`;
-        document.getElementById('fileInfoBox').classList.remove('hidden');
+        document.getElementById('thumbPreview').src = dataUrl;
+        document.getElementById('imageMetaName').textContent = state.originalFileName;
+        document.getElementById('imageMetaDimensions').textContent = `${img.naturalWidth} x ${img.naturalHeight} px`;
+        document.getElementById('imageMetaCard').classList.remove('hidden');
 
-        // Update viewer canvas
-        document.getElementById('emptyStageNotice').classList.add('hidden');
-        document.getElementById('transformStage').classList.remove('hidden');
-        
-        document.getElementById('imgOriginal').src = base64;
-        document.getElementById('imgEnhanced').src = base64;
-
-        updateSplitSlider(50);
-        resetZoomPan();
-        showToast("Gambar berhasil dimuat. Silakan tekan tombol Upscale!", "info");
+        renderStageImages(dataUrl, dataUrl);
+        showToast(`Gambar dimuat: ${img.naturalWidth}x${img.naturalHeight} px`, 'info');
       };
-      img.src = base64;
+      img.onerror = () => showToast('Berkas gambar rusak atau tidak didukung.', 'error');
+      img.src = dataUrl;
     }
 
-    // ------------------------------------------
-    // SLIDER COMPARISON SPLIT VIEW
-    // ------------------------------------------
-    function updateSplitSlider(percent) {
-      state.splitPosition = Math.max(0, Math.min(100, percent));
-      const handle = document.getElementById('splitHandle');
-      const clipWrapper = document.getElementById('originalClipWrapper');
-      
-      handle.style.left = `${state.splitPosition}%`;
-      clipWrapper.style.clipPath = `inset(0 ${100 - state.splitPosition}% 0 0)`;
+    function resetImageSelection(e) {
+      if (e) e.stopPropagation();
+      state.originalImage = null;
+      state.originalDataUrl = null;
+      state.enhancedDataUrl = null;
+
+      document.getElementById('imageMetaCard').classList.add('hidden');
+      document.getElementById('transformStage').classList.add('hidden');
+      document.getElementById('emptyCanvasPrompt').classList.remove('hidden');
+      document.getElementById('btnDownload').disabled = true;
+      document.getElementById('canvasResolutionTag').textContent = '0 x 0 px';
+    }
+
+    function loadDemoImage() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 400;
+      cvs.height = 300;
+      const ctx = cvs.getContext('2d');
+
+      const gr = ctx.createLinearGradient(0, 0, 400, 300);
+      gr.addColorStop(0, '#0f172a');
+      gr.addColorStop(1, '#1e1b4b');
+      ctx.fillStyle = gr;
+      ctx.fillRect(0, 0, 400, 300);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#4f46e5';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(40, 40, 320, 220, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px Inter, sans-serif';
+      ctx.fillText('ChatGPT Go Promo', 60, 85);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px Inter, sans-serif';
+      ctx.fillText('Diskon langganan 1 bulan', 60, 115);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 16px Inter, sans-serif';
+      ctx.fillText('Rp 75.000', 60, 155);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(58, 150);
+      ctx.lineTo(145, 150);
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 28px Inter, sans-serif';
+      ctx.fillText('Rp 0', 160, 158);
+
+      ctx.fillStyle = '#4f46e5';
+      ctx.beginPath();
+      ctx.roundRect(60, 185, 280, 40, 10);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('KLAIM DISKON SEKARANG', 200, 210);
+
+      state.originalFileName = 'demo-chatgpt-promo.png';
+      loadInputImage(cvs.toDataURL('image/png'));
+    }
+
+    /* ==========================================================================
+       SPLIT COMPARISON & VIEWPORT
+       ========================================================================== */
+    function renderStageImages(origUrl, enhUrl) {
+      const imgOrig = document.getElementById('imgOriginal');
+      const imgEnh = document.getElementById('imgEnhanced');
+      const stage = document.getElementById('transformStage');
+      const emptyPrompt = document.getElementById('emptyCanvasPrompt');
+
+      imgOrig.src = sanitizeImageUrl(origUrl);
+      imgEnh.src = sanitizeImageUrl(enhUrl);
+
+      emptyPrompt.classList.add('hidden');
+      stage.classList.remove('hidden');
+      document.getElementById('btnDownload').disabled = false;
+
+      updateSplitPosition(state.splitPos);
+      resetZoomPan();
+    }
+
+    function updateSplitPosition(posPercent) {
+      state.splitPos = Math.max(0, Math.min(100, posPercent));
+      const divider = document.getElementById('sliderDivider');
+      const clipBox = document.getElementById('originalClipContainer');
+
+      if (divider) divider.style.left = `${state.splitPos}%`;
+      if (clipBox) clipBox.style.clipPath = `polygon(0% 0%, ${state.splitPos}% 0%, ${state.splitPos}% 100%, 0% 100%)`;
     }
 
     function setupSplitSliderEvents() {
-      const stage = document.getElementById('stageViewport');
-      let isDragging = false;
+      const stage = document.getElementById('transformStage');
+      if (!stage) return;
 
-      function onMove(e) {
-        if (!isDragging || !state.originalImage) return;
-        const rect = document.getElementById('transformStage').getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const offset = clientX - rect.left;
-        const percent = (offset / rect.width) * 100;
-        updateSplitSlider(percent);
-      }
-
-      function onEnd() { isDragging = false; }
+      const handleMove = (clientX) => {
+        const rect = stage.getBoundingClientRect();
+        if (rect.width <= 0) return;
+        const x = clientX - rect.left;
+        const pct = (x / rect.width) * 100;
+        updateSplitPosition(pct);
+      };
 
       stage.addEventListener('mousedown', (e) => {
-        if (state.originalImage) { isDragging = true; onMove(e); }
+        state.isDraggingSplit = true;
+        handleMove(e.clientX);
       });
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onEnd);
 
+      window.addEventListener('mousemove', (e) => {
+        if (state.isDraggingSplit) handleMove(e.clientX);
+      });
+
+      window.addEventListener('mouseup', () => {
+        state.isDraggingSplit = false;
+      });
+
+      // Mobile Touch Handling
       stage.addEventListener('touchstart', (e) => {
-        if (state.originalImage) { isDragging = true; onMove(e); }
+        if (e.touches && e.touches[0]) {
+          state.isDraggingSplit = true;
+          handleMove(e.touches[0].clientX);
+        }
       }, { passive: true });
-      window.addEventListener('touchmove', onMove, { passive: true });
-      window.addEventListener('touchend', onEnd);
+
+      window.addEventListener('touchmove', (e) => {
+        if (state.isDraggingSplit && e.touches && e.touches[0]) {
+          handleMove(e.touches[0].clientX);
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        state.isDraggingSplit = false;
+      });
     }
 
     function resetZoomPan() {
-      const stage = document.getElementById('transformStage');
-      stage.style.transform = "none";
+      state.zoom = 1;
+      state.panX = 0;
+      state.panY = 0;
+      applyTransform();
     }
 
-    // ------------------------------------------
-    // KONTROL PENGATURAN SCALE & ENGINE
-    // ------------------------------------------
-    function setScale(scaleVal) {
-      state.scale = scaleVal;
-      [2, 4, 8].forEach(s => {
-        const btn = document.getElementById(`btnScale${s}`);
-        if (s === scaleVal) {
-          btn.className = "py-2 text-xs font-bold rounded-xl border border-indigo-500 bg-indigo-600/30 text-indigo-300 transition-all shadow-md shadow-indigo-600/20";
+    function applyTransform() {
+      const stage = document.getElementById('transformStage');
+      if (stage) {
+        stage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+      }
+    }
+
+    function setScaleFactor(scale) {
+      state.scale = scale;
+      document.querySelectorAll('.scale-btn').forEach(b => {
+        const s = parseInt(b.getAttribute('data-scale'), 10);
+        if (s === scale) {
+          b.className = 'scale-btn py-2 rounded-xl border border-indigo-500 bg-indigo-600/30 text-xs font-bold text-indigo-300 transition';
         } else {
-          btn.className = "py-2 text-xs font-bold rounded-xl border border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-300 transition-all";
+          b.className = 'scale-btn py-2 rounded-xl border border-gray-700 bg-gray-900 text-xs font-bold text-gray-300 hover:border-indigo-500 transition';
         }
       });
     }
 
-    function handleEngineChange() {
-      const selector = document.getElementById('engineSelector');
-      state.engine = selector.value;
-      const hint = document.getElementById('engineHintText');
-      if (state.engine === 'gemini_vision') {
-        hint.textContent = "Menggunakan model Gemini Flash Image untuk merekonstruksi detail, teks, dan ikon yang buram.";
-      } else {
-        hint.textContent = "Menggunakan algoritma penajaman konvolusi lokal di browser (tanpa koneksi internet).";
-      }
-    }
-
-    // ------------------------------------------
-    // PROSES SUPER-RESOLUTION AI
-    // ------------------------------------------
+    /* ==========================================================================
+       SUPER RESOLUTION PIPELINE EXECUTION
+       ========================================================================== */
     async function startUpscaleProcess() {
       if (!state.originalImage) {
-        showToast("Harap pilih gambar terlebih dahulu!", "warning");
+        showToast('Pilih gambar terlebih dahulu di Step 1.', 'error');
+        switchMobileTab('setup');
         return;
       }
+
       if (state.isProcessing) return;
 
-      state.isProcessing = true;
-      const btn = document.getElementById('btnExecuteUpscale');
-      const progressBox = document.getElementById('progressBox');
-      const progressBar = document.getElementById('progressBar');
-      const progressStatus = document.getElementById('progressStatus');
-      const progressPercent = document.getElementById('progressPercent');
-      const progressDetail = document.getElementById('progressDetail');
+      const engine = state.engine;
+      const isCloudEngine = engine.startsWith('gemini') || engine.startsWith('hf');
 
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'pointer-events-none');
-      progressBox.classList.remove('hidden');
+      if (isCloudEngine) {
+        if (engine.startsWith('gemini') && !apiKeys.geminiKey) {
+          openSettingsModal();
+          showToast('Masukkan Google Gemini API Key Anda untuk model cloud ini.', 'error');
+          return;
+        }
+
+        if (engine.startsWith('hf') && !apiKeys.hfKey) {
+          openSettingsModal();
+          showToast('Masukkan Token Hugging Face Anda di menu API Key.', 'error');
+          return;
+        }
+      }
+
+      state.isProcessing = true;
+      toggleProcessingUI(true, 'Menyiapkan Pipeline...');
+
+      const startTime = performance.now();
 
       try {
-        let resultBase64 = null;
+        let resultDataUrl = null;
 
-        if (state.engine === 'gemini_vision') {
-          progressStatus.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-indigo-400"></i> AI Super-Resolution Aktif...';
-          progressPercent.textContent = '30%';
-          progressBar.style.width = '30%';
-          progressDetail.textContent = 'Mengirim gambar ke model Gemini Flash Image...';
-
-          try {
-            resultBase64 = await callGeminiSuperResolution(state.originalBase64, state.scale);
-            progressBar.style.width = '90%';
-            progressPercent.textContent = '90%';
-          } catch (apiErr) {
-            console.warn("AI API Error, fallback to Local Enhanced Shader:", apiErr);
-            showToast("Dialihkan ke Local Shader: " + apiErr.message, "warning");
-            resultBase64 = await processLocalLaplacianUpscale(state.originalImage, state.scale);
-          }
+        if (engine.startsWith('gemini')) {
+          resultDataUrl = await executeGeminiCloudUpscale(state.originalDataUrl, engine, state.scale);
+        } else if (engine.startsWith('hf')) {
+          resultDataUrl = await executeHuggingFaceUpscale(state.originalDataUrl, engine, state.scale);
         } else {
-          progressStatus.innerHTML = '<i class="fa-solid fa-bolt text-amber-400"></i> Memproses Local Shader...';
-          progressPercent.textContent = '50%';
-          progressBar.style.width = '50%';
-          resultBase64 = await processLocalLaplacianUpscale(state.originalImage, state.scale);
+          resultDataUrl = await executeSelectedLocalEngine(state.originalImage, engine, state.scale);
         }
 
-        // Terapkan hasil ke canvas
-        state.enhancedBase64 = resultBase64;
-        document.getElementById('imgEnhanced').src = resultBase64;
-        document.getElementById('btnDownloadResult').disabled = false;
-        document.getElementById('viewerResBadge').classList.remove('hidden');
+        const duration = ((performance.now() - startTime) / 1000).toFixed(1);
 
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
-        progressStatus.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Selesai!';
-        progressDetail.textContent = 'Gambar berhasil ditingkatkan kualitasnya.';
+        state.enhancedDataUrl = resultDataUrl;
+        renderStageImages(state.originalDataUrl, resultDataUrl);
 
-        // Simpan ke History
+        const finalW = state.originalImage.naturalWidth * state.scale;
+        const finalH = state.originalImage.naturalHeight * state.scale;
+        document.getElementById('canvasResolutionTag').textContent = `${finalW} x ${finalH} px (${state.scale}x)`;
+
         addToHistory({
-          name: state.fileName,
-          scale: `${state.scale}x`,
-          engine: state.engine === 'gemini_vision' ? 'Gemini Flash' : 'Local Laplacian',
-          time: new Date().toLocaleTimeString(),
-          thumb: resultBase64
+          fileName: state.originalFileName,
+          model: engine,
+          scale: state.scale,
+          duration: `${duration}s`,
+          originalUrl: state.originalDataUrl,
+          enhancedUrl: resultDataUrl,
+          dimensions: `${finalW} x ${finalH}`
         });
 
-        // Efek kembang api visual
-        if (typeof confetti === 'function') {
-          confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
-        }
-
-        showToast("Upscaling selesai! Geser slider untuk melihat perbandingan.", "success");
-
-        // Di mobile, otomatis buka tab preview
-        if (window.innerWidth < 768) {
-          switchMobileTab('preview');
-        }
+        showToast(`Selesai dalam ${duration}s! Periksa perbandingan pada kanvas.`, 'success');
+        switchMobileTab('preview');
 
       } catch (err) {
-        showToast("Gagal memproses: " + err.message, "error");
+        console.error('Upscale Pipeline Error:', err);
+        showToast(`Gagal: ${err.message}`, 'error');
       } finally {
         state.isProcessing = false;
-        btn.disabled = false;
-        btn.classList.remove('opacity-50', 'pointer-events-none');
-        setTimeout(() => progressBox.classList.add('hidden'), 2500);
+        toggleProcessingUI(false);
       }
     }
 
-    // Panggilan API Gemini 3.1 Flash Image
-    async function callGeminiSuperResolution(sourceBase64, scale) {
-      const apiKey = (currentUser && currentUser.apiKey) ? currentUser.apiKey : "";
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+    /* ==========================================================================
+       AI CLOUD ENGINES (SECURE GEMINI & HF)
+       ========================================================================== */
+    async function executeGeminiCloudUpscale(dataUrl, modelName, scale) {
+      updateProgress(25, 'Mengunggah ke Gemini Vision...', 'Analisis teks dan struktur gambar...');
 
-      const mimeMatch = sourceBase64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
-      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
-      const base64Data = mimeMatch ? mimeMatch[2] : sourceBase64;
+      const base64Data = dataUrl.split(',')[1];
+      const mimeType = dataUrl.split(';')[0].split(':')[1] || 'image/png';
+      const key = apiKeys.geminiKey || '';
 
-      const prompt = `Act as an ultra-high precision Super-Resolution and Image Reconstruction Engine.
-Scale: ${scale}x enhancement.
-- Reconstruct all blurry details, typography, small numbers, user interface icons, and edges.
-- Eliminate compression noise, blur, and artifacts.
-- Make text razor-sharp, legible, and crisp as if rendered natively.
-- Preserve exact layout, color palette, and proportions. Return ONLY the enhanced image.`;
+      const promptText = `Act as an ultra-high-definition Super Resolution and AI Image Restoration engine. 
+Task: Upscale and enhance this image by ${scale}x.
+Crucial Requirements:
+1. De-blur, sharpen, and reconstruct all readable typography, numbers, UI elements, and icons with crisp, anti-aliased, vector-like fidelity.
+2. Clean all compression block artifacts, noise, and chroma smearing.
+3. Preserve the exact composition, color grading, and structural integrity.
+Return ONLY the enhanced high-resolution image.`;
 
       const payload = {
         contents: [
           {
             role: "user",
             parts: [
-              { text: prompt },
-              { inlineData: { mimeType, data: base64Data } }
+              { text: promptText },
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
+                }
+              }
             ]
           }
         ],
-        generationConfig: { responseModalities: ['IMAGE'] }
+        generationConfig: {
+          responseModalities: ["IMAGE", "TEXT"]
+        }
       };
 
-      const response = await fetch(apiUrl, {
+      // Header-based API Authentication (Anti-leak)
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`;
+
+      updateProgress(55, 'AI Neural Synthesis...', 'Merekonstruksi detail sub-pixel...');
+      
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'x-goog-api-key': key 
+        },
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        if (response.status === 400 && !apiKey) {
-          openAuthModal('register');
-          throw new Error("Masukkan API Key Gemini pribadi Anda untuk pemrosesan cloud tak terbatas.");
+      const json = await res.json();
+
+      if (json.error) {
+        if (json.error.code === 429) {
+          throw new Error('Kuota Google AI Studio akun Anda telah tercapai (HTTP 429). Tunggu 1 menit atau gunakan Local Engine.');
         }
-        throw new Error(`HTTP ${response.status}: ${errText.substring(0, 80)}`);
+        throw new Error(json.error.message || 'Gagal menghubungi Gemini API');
       }
 
-      const result = await response.json();
-      const inlinePart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-      if (!inlinePart || !inlinePart.inlineData?.data) {
-        throw new Error("Format respon API tidak menyertakan data gambar");
+      updateProgress(85, 'Memuat Hasil Rekonstruksi...', 'Finalisasi render kanvas...');
+
+      const candidate = json.candidates?.[0];
+      const imagePart = candidate?.content?.parts?.find(p => p.inlineData);
+
+      if (imagePart && imagePart.inlineData?.data) {
+        return `data:${imagePart.inlineData.mimeType || 'image/png'};base64,${imagePart.inlineData.data}`;
       }
 
-      return `data:${inlinePart.inlineData.mimeType || 'image/png'};base64,${inlinePart.inlineData.data}`;
+      throw new Error('Model tidak mengembalikan citra baru secara langsung. Silakan gunakan model Gemini 3.1 Flash Image.');
     }
 
-    // Pemrosesan Lokal Laplacian & Unsharp Masking
-    async function processLocalLaplacianUpscale(img, scale) {
+    async function executeHuggingFaceUpscale(dataUrl, modelKey, scale) {
+      updateProgress(30, 'Mengirim ke Hugging Face Server...', 'Inisialisasi SwinIR container...');
+      
+      const base64Data = dataUrl.split(',')[1];
+      const binary = atob(base64Data);
+      const array = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+
+      const hfModelPath = modelKey === 'hf_swinir' 
+        ? 'caidas/swin2SR-classical-sr-x4-64' 
+        : 'xinntao/Real-ESRGAN';
+
+      const res = await fetch(`https://api-inference.huggingface.co/models/${hfModelPath}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKeys.hfKey}`,
+          'Content-Type': 'application/octet-stream'
+        },
+        body: array
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Hugging Face error (${res.status}): ${errText}`);
+      }
+
+      const blob = await res.blob();
       return new Promise((resolve) => {
-        setTimeout(() => {
-          const w = img.naturalWidth * scale;
-          const h = img.naturalHeight * scale;
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(img, 0, 0, w, h);
-
-          // Terapkan filter penajaman piksel
-          const imgData = ctx.getImageData(0, 0, w, h);
-          const data = imgData.data;
-          const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0]; // 3x3 Sharpen Kernel
-          const side = 3;
-          const halfSide = 1;
-          const output = ctx.createImageData(w, h);
-          const dst = output.data;
-
-          for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
-              let r = 0, g = 0, b = 0;
-              for (let cy = 0; cy < side; cy++) {
-                for (let cx = 0; cx < side; cx++) {
-                  const scx = x + cx - halfSide;
-                  const scy = y + cy - halfSide;
-                  const srcOff = (scy * w + scx) * 4;
-                  const wt = weights[cy * side + cx];
-                  r += data[srcOff] * wt;
-                  g += data[srcOff + 1] * wt;
-                  b += data[srcOff + 2] * wt;
-                }
-              }
-              const dstOff = (y * w + x) * 4;
-              dst[dstOff] = Math.min(255, Math.max(0, r));
-              dst[dstOff + 1] = Math.min(255, Math.max(0, g));
-              dst[dstOff + 2] = Math.min(255, Math.max(0, b));
-              dst[dstOff + 3] = data[dstOff + 3];
-            }
-          }
-          ctx.putImageData(output, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        }, 100);
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
       });
     }
 
-    // ------------------------------------------
-    // DOWNLOAD & HISTORY
-    // ------------------------------------------
+    /* ==========================================================================
+       LOCAL OPEN-SOURCE ENGINES (100% Client-Side, Shaders)
+       ========================================================================== */
+    async function executeSelectedLocalEngine(imageEl, engineKey, scale) {
+      updateProgress(20, 'Inisialisasi Matriks Konvolusi...', 'Menyiapkan memori kanvas lokal...');
+
+      const targetW = Math.round(imageEl.naturalWidth * scale);
+      const targetH = Math.round(imageEl.naturalHeight * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(imageEl, 0, 0, targetW, targetH);
+
+      updateProgress(50, 'Menjalankan Kernel Filter...', `Menerapkan algoritma ${engineKey}...`);
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const pixels = imgData.data;
+
+      if (engineKey === 'waifu2x_shader') {
+        applyWaifuOutlineRefine(pixels, targetW, targetH);
+      } else if (engineKey === 'lanczos3_core') {
+        applyLanczosSharpeningPass(pixels, targetW, targetH);
+      } else if (engineKey === 'hermite_spline') {
+        applyHermiteEdgePreserve(pixels, targetW, targetH);
+      } else if (engineKey === 'bilateral_unsharp') {
+        applyBilateralSharpen(pixels, targetW, targetH);
+      } else {
+        applyMultiPassLaplacian(pixels, targetW, targetH);
+      }
+
+      updateProgress(85, 'Menulis Ulang Buffer Piksel...', 'Menyusun frame akhir...');
+      ctx.putImageData(imgData, 0, 0);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    function applyWaifuOutlineRefine(d, w, h) {
+      const copy = new Uint8ClampedArray(d);
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = (y * w + x) * 4;
+          for (let c = 0; c < 3; c++) {
+            const center = copy[idx + c];
+            const left = copy[((y * w) + (x - 1)) * 4 + c];
+            const right = copy[((y * w) + (x + 1)) * 4 + c];
+            const diff = Math.abs(center - left) + Math.abs(center - right);
+            d[idx + c] = Math.min(255, Math.max(0, center + (diff > 25 ? (center > 128 ? 14 : -14) : 0)));
+          }
+        }
+      }
+    }
+
+    function applyLanczosSharpeningPass(d, w, h) {
+      const copy = new Uint8ClampedArray(d);
+      const kernel = [
+        0, -0.6, 0,
+        -0.6, 3.4, -0.6,
+        0, -0.6, 0
+      ];
+      convolveKernel3x3(d, copy, w, h, kernel);
+    }
+
+    function applyHermiteEdgePreserve(d, w, h) {
+      const copy = new Uint8ClampedArray(d);
+      const kernel = [
+        -0.2, -0.5, -0.2,
+        -0.5, 3.8, -0.5,
+        -0.2, -0.5, -0.2
+      ];
+      convolveKernel3x3(d, copy, w, h, kernel);
+    }
+
+    function applyBilateralSharpen(d, w, h) {
+      const copy = new Uint8ClampedArray(d);
+      for (let i = 0; i < d.length; i += 4) {
+        const luma = 0.299 * copy[i] + 0.587 * copy[i + 1] + 0.114 * copy[i + 2];
+        const boost = luma > 40 && luma < 210 ? 1.08 : 1.0;
+        d[i] = Math.min(255, copy[i] * boost);
+        d[i + 1] = Math.min(255, copy[i + 1] * boost);
+        d[i + 2] = Math.min(255, copy[i + 2] * boost);
+      }
+    }
+
+    function applyMultiPassLaplacian(d, w, h) {
+      const copy = new Uint8ClampedArray(d);
+      const kernel = [
+        0, -1, 0,
+        -1, 5, -1,
+        0, -1, 0
+      ];
+      convolveKernel3x3(d, copy, w, h, kernel);
+    }
+
+    function convolveKernel3x3(dst, src, w, h, k) {
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = (y * w + x) * 4;
+          for (let c = 0; c < 3; c++) {
+            let sum = 
+              src[((y - 1) * w + (x - 1)) * 4 + c] * k[0] +
+              src[((y - 1) * w + x) * 4 + c] * k[1] +
+              src[((y - 1) * w + (x + 1)) * 4 + c] * k[2] +
+              src[(y * w + (x - 1)) * 4 + c] * k[3] +
+              src[(y * w + x) * 4 + c] * k[4] +
+              src[(y * w + (x + 1)) * 4 + c] * k[5] +
+              src[((y + 1) * w + (x - 1)) * 4 + c] * k[6] +
+              src[((y + 1) * w + x) * 4 + c] * k[7] +
+              src[((y + 1) * w + (x + 1)) * 4 + c] * k[8];
+            dst[idx + c] = Math.min(255, Math.max(0, sum));
+          }
+        }
+      }
+    }
+
+    /* ==========================================================================
+       PROGRESS & UI NOTIFICATIONS
+       ========================================================================== */
+    function toggleProcessingUI(isProcessing, initialText = '') {
+      const box = document.getElementById('progressBox');
+      const btn = document.getElementById('btnStartUpscale');
+      if (box) box.classList.toggle('hidden', !isProcessing);
+      if (btn) btn.disabled = isProcessing;
+
+      if (isProcessing) {
+        updateProgress(5, initialText, 'Memulai...');
+      }
+    }
+
+    function updateProgress(percent, text, subtext) {
+      const pBar = document.getElementById('progressBar');
+      const pPct = document.getElementById('progressPercent');
+      const pTxt = document.getElementById('progressText');
+      const pSub = document.getElementById('progressSubtext');
+
+      if (pBar) pBar.style.width = `${percent}%`;
+      if (pPct) pPct.textContent = `${percent}%`;
+      if (pTxt && text) pTxt.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${text}`;
+      if (pSub && subtext) pSub.textContent = subtext;
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgColors = {
+        success: 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200',
+        error: 'bg-rose-950/90 border-rose-500/50 text-rose-200',
+        info: 'bg-indigo-950/90 border-indigo-500/50 text-indigo-200'
+      };
+
+      const icons = {
+        success: 'fa-circle-check text-emerald-400',
+        error: 'fa-circle-exclamation text-rose-400',
+        info: 'fa-circle-info text-indigo-400'
+      };
+
+      toast.className = `p-3.5 rounded-xl border backdrop-blur-md shadow-2xl flex items-start gap-3 pointer-events-auto text-xs font-medium transition duration-300 ${bgColors[type] || bgColors.info}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icons[type] || icons.info} text-sm mt-0.5"></i>
+        <div class="flex-1 break-words">${escapeHtml(message)}</div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    /* ==========================================================================
+       DOWNLOAD & SECURE HISTORY
+       ========================================================================== */
     function downloadResultImage() {
-      if (!state.enhancedBase64) return;
-      const a = document.createElement('a');
-      a.href = state.enhancedBase64;
-      a.download = `upscaled-${state.scale}x-${state.fileName.replace(/\.[^/.]+$/, "")}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast("Gambar berhasil diunduh!", "success");
+      if (!state.enhancedDataUrl) return;
+      const link = document.createElement('a');
+      const baseName = sanitizeFilename(state.originalFileName.replace(/\.[^/.]+$/, ""));
+      link.download = `${baseName}-upscaled-${state.scale}x.png`;
+      link.href = sanitizeImageUrl(state.enhancedDataUrl);
+      link.click();
+      showToast('Gambar hasil berhasil diunduh.', 'success');
     }
 
     function addToHistory(item) {
-      state.history.unshift(item);
-      const badge = document.getElementById('historyBadgeMobile');
-      badge.textContent = state.history.length;
-      badge.classList.remove('hidden');
+      state.history.unshift({
+        ...item,
+        id: Date.now(),
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      // Batasi 8 riwayat agar memori browser tidak membeku
+      if (state.history.length > 8) state.history.pop();
+      updateHistoryBadge();
+    }
+
+    function updateHistoryBadge() {
+      const badge = document.getElementById('historyBadge');
+      if (!badge) return;
+      if (state.history.length > 0) {
+        badge.textContent = state.history.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
     }
 
     function openHistoryModal() {
-      const container = document.getElementById('historyListContainer');
+      const list = document.getElementById('historyListContainer');
+      if (!list) return;
+
+      list.innerHTML = '';
       if (state.history.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">Belum ada riwayat proses pada sesi ini.</p>`;
-      } else {
-        container.innerHTML = state.history.map((h, i) => `
-          <div class="p-2.5 rounded-xl bg-gray-950 border border-gray-800 flex items-center justify-between gap-3">
-            <img src="${h.thumb}" class="w-12 h-12 object-cover rounded-lg border border-gray-700">
-            <div class="flex-1 overflow-hidden">
-              <p class="text-xs font-bold text-white truncate">${h.name}</p>
-              <p class="text-[10px] text-gray-400">${h.engine} • ${h.scale} • ${h.time}</p>
-            </div>
-            <button onclick="restoreFromHistory(${i})" class="px-2.5 py-1 text-xs rounded-lg bg-indigo-600/30 text-indigo-400 hover:bg-indigo-600 hover:text-white">
-              Buka
-            </button>
+        list.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fa-solid fa-clock-rotate-left text-2xl mb-2"></i>
+            <p class="text-xs">Belum ada riwayat proses pada sesi ini.</p>
           </div>
-        `).join('');
+        `;
+      } else {
+        state.history.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'p-3 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-between gap-3 hover:border-indigo-500/50 transition cursor-pointer';
+          
+          const safeEnhancedUrl = sanitizeImageUrl(item.enhancedUrl);
+          const safeFileName = sanitizeFilename(item.fileName);
+
+          div.innerHTML = `
+            <div class="flex items-center gap-3 overflow-hidden" onclick="loadFromHistory(${item.id})">
+              <img src="${safeEnhancedUrl}" class="w-10 h-10 rounded-lg object-cover border border-gray-700 flex-shrink-0" alt="thumb">
+              <div class="truncate">
+                <p class="text-xs font-bold text-white truncate">${escapeHtml(safeFileName)}</p>
+                <p class="text-[10px] text-gray-400">${escapeHtml(String(item.scale))}x • ${escapeHtml(item.dimensions)} px • ${escapeHtml(item.duration)}</p>
+              </div>
+            </div>
+            <a href="${safeEnhancedUrl}" download="history-${safeFileName}" class="p-2 text-indigo-400 hover:text-white rounded-lg hover:bg-gray-800 text-xs transition" title="Unduh">
+              <i class="fa-solid fa-download"></i>
+            </a>
+          `;
+          list.appendChild(div);
+        });
       }
+
       document.getElementById('historyModal').classList.remove('hidden');
     }
 
@@ -1112,47 +1392,135 @@ Scale: ${scale}x enhancement.
       document.getElementById('historyModal').classList.add('hidden');
     }
 
-    function clearHistory() {
+    function clearAllHistory() {
       state.history = [];
-      document.getElementById('historyBadgeMobile').classList.add('hidden');
+      updateHistoryBadge();
+      openHistoryModal();
+      showToast('Riwayat sesi dibersihkan.', 'info');
+    }
+
+    function loadFromHistory(id) {
+      const item = state.history.find(h => h.id === id);
+      if (!item) return;
+
+      state.originalDataUrl = item.originalUrl;
+      state.enhancedDataUrl = item.enhancedUrl;
+      state.originalFileName = item.fileName;
+      renderStageImages(item.originalUrl, item.enhancedUrl);
       closeHistoryModal();
-      showToast("Riwayat telah dibersihkan.", "info");
+      switchMobileTab('preview');
+      showToast(`Memuat hasil riwayat: ${item.fileName}`, 'info');
     }
 
-    function restoreFromHistory(index) {
-      const item = state.history[index];
-      if (item) {
-        state.enhancedBase64 = item.thumb;
-        document.getElementById('imgEnhanced').src = item.thumb;
-        document.getElementById('btnDownloadResult').disabled = false;
-        closeHistoryModal();
-        if (window.innerWidth < 768) switchMobileTab('preview');
-        showToast("Gambar riwayat dimuat ke canvas.", "info");
-      }
-    }
-
-    // ------------------------------------------
-    // TAB SWITCHING DI MOBILE
-    // ------------------------------------------
+    /* ==========================================================================
+       MOBILE RESPONSIVENESS TAB SWITCHER
+       ========================================================================== */
     function switchMobileTab(tab) {
-      const sidebar = document.getElementById('setupSidebar');
-      const viewer = document.getElementById('viewerContainer');
-      const btnSetup = document.getElementById('tabBtnSetup');
-      const btnPreview = document.getElementById('tabBtnPreview');
+      const setupPanel = document.getElementById('setupPanel');
+      const previewPanel = document.getElementById('previewPanel');
+      const navSetup = document.getElementById('mobileNavSetup');
+      const navPreview = document.getElementById('mobileNavPreview');
 
       if (tab === 'setup') {
-        sidebar.classList.remove('hidden');
-        viewer.classList.add('hidden');
-        btnSetup.className = "flex flex-col items-center gap-1 text-indigo-400 font-bold text-[11px]";
-        btnPreview.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white font-medium text-[11px]";
+        setupPanel.classList.remove('hidden');
+        previewPanel.classList.add('hidden');
+        if (navSetup) navSetup.className = 'flex-1 flex flex-col items-center justify-center gap-0.5 text-indigo-400 font-bold transition';
+        if (navPreview) navPreview.className = 'flex-1 flex flex-col items-center justify-center gap-0.5 text-gray-400 hover:text-white transition';
       } else {
-        sidebar.classList.add('hidden');
-        viewer.classList.remove('hidden');
-        btnPreview.className = "flex flex-col items-center gap-1 text-indigo-400 font-bold text-[11px]";
-        btnSetup.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white font-medium text-[11px]";
-        resetZoomPan();
+        setupPanel.classList.add('hidden');
+        previewPanel.classList.remove('hidden');
+        if (navPreview) navPreview.className = 'flex-1 flex flex-col items-center justify-center gap-0.5 text-indigo-400 font-bold transition';
+        if (navSetup) navSetup.className = 'flex-1 flex flex-col items-center justify-center gap-0.5 text-gray-400 hover:text-white transition';
+        
+        requestAnimationFrame(() => {
+          resetZoomPan();
+        });
       }
     }
+
+    /* ==========================================================================
+       DROPDOWN ENGINE CHANGE HANDLER
+       ========================================================================== */
+    function handleEngineModelChange() {
+      const selector = document.getElementById('engineSelector');
+      if (!selector) return;
+
+      const selectedKey = selector.value;
+      state.engine = selectedKey;
+
+      const profile = modelProfiles[selectedKey] || modelProfiles['gemini-3.1-flash-image'];
+
+      const tagEl = document.getElementById('modelGuideTag');
+      if (tagEl) {
+        tagEl.innerHTML = `<i class="fa-solid ${profile.tagIcon} text-[9px]"></i> ${profile.tag}`;
+      }
+
+      const quotaEl = document.getElementById('modelQuotaStatus');
+      if (quotaEl) {
+        quotaEl.className = `text-[10px] font-semibold flex items-center gap-1 ${profile.quotaClass}`;
+        quotaEl.innerHTML = `<i class="fa-solid ${profile.quotaIcon} text-[9px]"></i> ${profile.quota}`;
+      }
+
+      const optEl = document.getElementById('modelOptimalFor');
+      if (optEl) optEl.textContent = profile.optimal;
+
+      const descEl = document.getElementById('modelDescription');
+      if (descEl) descEl.textContent = profile.desc;
+
+      const speedEl = document.getElementById('modelSpeed');
+      if (speedEl) speedEl.innerHTML = `<i class="fa-solid fa-gauge-high text-amber-400"></i> Kecepatan: ${profile.speed}`;
+
+      const hwEl = document.getElementById('modelHardware');
+      if (hwEl) hwEl.innerHTML = `<i class="fa-solid fa-microchip text-indigo-400"></i> Beban: ${profile.hardware}`;
+    }
+
+    /* ==========================================================================
+       SECURITY SANITIZERS (ANTI-XSS & ANTI-INJECTION)
+       ========================================================================== */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function sanitizeImageUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      const trimmed = url.trim();
+      // Hanya izinkan skema gambar murni (data:image/ atau blob:)
+      if (trimmed.startsWith('data:image/') || trimmed.startsWith('blob:')) {
+        return trimmed;
+      }
+      return '';
+    }
+
+    function sanitizeFilename(name) {
+      if (!name || typeof name !== 'string') return 'image.png';
+      return name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    }
+
+    /* ==========================================================================
+       INITIALIZATION
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadApiKeys();
+      setupSplitSliderEvents();
+      setupDragAndDrop();
+
+      const selector = document.getElementById('engineSelector');
+      if (selector) {
+        selector.addEventListener('change', handleEngineModelChange);
+        selector.addEventListener('input', handleEngineModelChange);
+      }
+      handleEngineModelChange();
+
+      if (window.innerWidth < 768) {
+        switchMobileTab('setup');
+      }
+    });
   </script>
 </body>
 </html>
